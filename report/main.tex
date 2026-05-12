@@ -114,23 +114,22 @@ Adam Włodarski (230983)
 \vspace{0.5cm}
 \noindent\textbf{Słowa kluczowe:} klasyfikacja wieloetykietowa
 
+
+% ----------------------------------------------------
+
 \chapter{Wstęp}
+
+
+% ----------------------------------------------------
 
 
 \chapter{Przedmiot badania}
 
+% ----------------------------------------------------
+
 
 \section{Cel i zakres badania}
 
-\begin{table}[H]
-\centering
-\caption{Opis zmiennych wykorzystanych w badaniu}
-\begin{tabular}{|l|l|}
-\hline
-\textbf{Zmienna} & \textbf{Opis merytoryczny} \\ \hline
-xxx & xxxxx \\ \hline
-\end{tabular}
-\end{table}
 
 \section{Wstępna analiza danych}
 
@@ -167,21 +166,41 @@ xxx & xxxxx \\ \hline
 
 
 
+% ----------------------------------------------------
 
 
 \chapter{Opis metod}
 
 % minimum trzy metody i stworzenie modelu hybrydowego (np. średnia ważona score’ów z metod), formalnie więc: minimum cztery mechanizmy decyzyjne
 
-\section{Metoda1}
+\section{Wielomianowa regresja logistyczna}
 
-\section{Metoda2}
+Zakłada, że cechy są niezależne, a w wybranym zbiorze takie nie są.
 
-\section{Metoda3}
 
-\section{Model hybrydowy}
+"The multinomial logistic model assumes that data are case-specific; that is, each independent variable has a single value for each case. As with other types of regression, there is no need for the independent variables to be statistically independent from each other (unlike, for example, in a naive Bayes classifier); however, collinearity is assumed to be relatively low, as it becomes difficult to differentiate between the impact of several variables if this is not the case." wtf
 
-\section{Literatura przedmiotu}
+
+
+\section{LDA - Linear Discriminant Analysis}
+
+
+
+\section{QDA - Quadratic Discriminant Analysis}
+
+
+
+\section{Naive Bayes}
+
+Zakłada, że cechy są niezależne, a w wybranym zbiorze takie nie są.
+
+\section{Random Forest}
+
+% wiele drzew klasyfikacyjnych
+
+\section{SVM - metoda wektorów nośnych}
+
+
 
 \section{Przegląd literatury dotyczącej metod}
 
@@ -190,7 +209,7 @@ xxx & xxxxx \\ \hline
 
 
 
-
+% ----------------------------------------------------
 
 \chapter{Wyniki}
 
@@ -203,6 +222,7 @@ xxx & xxxxx \\ \hline
 % (np. krzyżowa, leave-one-out, wielokrotne próbkowanie) – minimum jeden sposó
 
 
+% ----------------------------------------------------
 
 
 \chapter{Przykład użycia modeli na stworzonych sztucznie obserwacjach}

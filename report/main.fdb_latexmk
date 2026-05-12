@@ -1,6 +1,6 @@
 # Fdb version 4
-["pdflatex"] 1778588798.53118 "c:/Users/asiad/Desktop/dane/DataAnalysisMethods-Classification/report/main.tex" "main.pdf" "main" 1778588801.99929 0
-  "c:/Users/asiad/Desktop/dane/DataAnalysisMethods-Classification/report/main.tex" 1778588037 4357 e76c8598d4665189bf83a087e7f883cc ""
+["pdflatex"] 1778619211.59881 "c:/Users/asiad/Desktop/dane/DataAnalysisMethods-Classification/report/main.tex" "main.pdf" "main" 1778619213.52736 0
+  "c:/Users/asiad/Desktop/dane/DataAnalysisMethods-Classification/report/main.tex" 1778619210 5289 21753ad5186031fbeeb5f8be9905ca2c ""
   "c:/texlive/2024/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc" 1740767142 2971 def0b6c1f0b107b3b936def894055589 ""
   "c:/texlive/2024/texmf-dist/fonts/map/fontname/texfonts.map" 1740768588 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "c:/texlive/2024/texmf-dist/fonts/tfm/jknappen/ec/ecbx1000.tfm" 1740767820 3584 2d666ecf6d466d8b007246bc2f94d9da ""
@@ -192,10 +192,10 @@
   "c:/texlive/2024/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1740775179 5512713 1e2df2d1e914a8052c604db674da6db6 ""
   "c:/texlive/2024/texmf-var/web2c/pdftex/pdflatex.fmt" 1740775342 3352887 6a4f67cc9524e426880524feda0fadc4 ""
   "c:/texlive/2024/texmf.cnf" 1740775138 713 e69b156964470283e0530f5060668171 ""
-  "main.aux" 1778588801 3972 2e83fcf2b5de84578c0bf8ddcdf3389e "pdflatex"
-  "main.out" 1778588801 3182 3c2bb5f01ccfd3f8839507b9e2f5d8b4 "pdflatex"
-  "main.tex" 1778588037 4357 e76c8598d4665189bf83a087e7f883cc ""
-  "main.toc" 1778588801 1700 a3e025980bd3080f757495ec131ac99a "pdflatex"
+  "main.aux" 1778619213 4017 9b349eda788cb66030ad72a31922b6ce "pdflatex"
+  "main.out" 1778619213 3785 0356fc6264d3a4c0d51b2bbccca34e8b "pdflatex"
+  "main.tex" 1778619210 5289 21753ad5186031fbeeb5f8be9905ca2c ""
+  "main.toc" 1778619213 1862 d090f6f12d5d72a75d356416bf77c851 "pdflatex"
   "tabele_statystyki_opisowe.tex" 1778588742 1879 48b2a09944fb02882014d2c9cf94087c ""
   (generated)
   "main.aux"
