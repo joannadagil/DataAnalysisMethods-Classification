@@ -1,0 +1,301 @@
+  \documentclass{report}
+
+% Language setting
+% Replace `english' with e.g. `spanish' to change the document language
+\usepackage[utf8]{inputenc}
+\usepackage[polish]{babel}
+\usepackage[T1]{fontenc}
+
+\usepackage{array}
+\usepackage{booktabs}
+
+% Set page size and margins
+% Replace `letterpaper' with `a4paper' for UK/EU standard size
+\usepackage[letterpaper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+% Useful packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorlinks=true, allcolors=black]{hyperref}
+
+\usepackage{float}
+
+
+\usepackage{listings}
+\lstset{
+  inputencoding=utf8,
+  extendedchars=true,
+  literate=
+    {ą}{{\k{a}}}1
+    {ć}{{\'c}}1
+    {ę}{{\k{e}}}1
+    {ł}{{\l{}}}1
+    {ń}{{\'n}}1
+    {ó}{{\'o}}1
+    {ś}{{\'s}}1
+    {ź}{{\'z}}1
+    {ż}{{\.z}}1
+    {Ą}{{\k{A}}}1
+    {Ć}{{\'C}}1
+    {Ę}{{\k{E}}}1
+    {Ł}{{\L{}}}1
+    {Ń}{{\'N}}1
+    {Ó}{{\'O}}1
+    {Ś}{{\'S}}1
+    {Ź}{{\'Z}}1
+    {Ż}{{\.Z}}1,
+}
+
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\usepackage{tikz}
+\usetikzlibrary{trees}
+\usepackage{forest}
+\usetikzlibrary{arrows.meta, shapes.geometric, positioning}
+
+\usepackage{authblk}
+
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{subcaption}
+
+\title{\LARGE{Klasyfikacja}
+
+\vspace{0.3cm}
+
+\Large{Metody Analizy Danych - zadanie projektowe 2}}
+
+\author{
+Joanna Dagil (231008),
+Liliana Grześkiewicz (236138),
+Piotr Szpatuśko (223420),
+Adam Włodarski (230983)
+}
+
+\date{rok akademicki 2025/2026}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\chapter*{Streszczenie}
+\addcontentsline{toc}{chapter}{Streszczenie}
+
+
+
+\vspace{0.5cm}
+\noindent\textbf{Słowa kluczowe:} klasyfikacja
+
+\chapter{Wstęp}
+
+
+
+
+
+
+
+\chapter{Przedmiot badania}
+
+
+
+
+
+\section{Cel i zakres badania}
+
+
+
+
+
+
+
+\section{Przegląd literatury}
+
+%(min. 1 cytowanie powiązane tematycznie i krótki opis co było badane)
+
+
+
+
+
+\section{Zmienne wybrane do analizy}
+
+
+
+\begin{table}[H]
+\centering
+\caption{Opis zmiennych wykorzystanych w badaniu}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Zmienna} & \textbf{Opis merytoryczny} \\ \hline
+xxx & xxxxx \\ \hline
+\end{tabular}
+\end{table}
+
+\section{Wstępna analiza danych}
+
+\subsection{Statystyki opisowe i podstawowa wizualizacja}
+
+% (przynajmniej: średnia, mediana, minimum, maksimum, odchylenie standardowe, skośność)
+
+\begin{table}[H]
+
+\caption{Statystyki opisowe zmiennych wykorzystanych w analizie}
+\centering
+\begin{tabular}[t]{lrrrrrr}
+\toprule
+  & Srednia & Mediana & Minimum & Maksimum & OdchylenieStandardowe & Skosnosc\\
+\midrule
+price & 626 200.24 & 660 000.00 & 1 700.00 & 3 000 000.00 & 526 704.50 & 0.75\\
+squareMeters & 55.35 & 50.49 & 25.00 & 150.00 & 21.38 & 1.48\\
+rooms & 2.53 & 2.00 & 1.00 & 6.00 & 0.92 & 0.99\\
+poiCount & 24.35 & 14.00 & 0.00 & 212.00 & 33.62 & 2.99\\
+centreDistance & 3.82 & 3.71 & 0.14 & 9.99 & 2.17 & 0.38\\
+hasBalcony & 0.63 & 1.00 & 0.00 & 1.00 & 0.48 & -0.55\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%np. boxplot, histogramy
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.99\linewidth]{Podstawowa_wizualizacja.png}
+%     \caption{Wizualizacje}
+% \end{figure}
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Braki Danych}
+
+% czy występują i jak je obsłużono
+
+
+
+
+
+
+
+
+
+
+
+
+
+\chapter{Opis metod}
+
+
+\section{xxx}
+
+\subsection{Opis metody}
+
+
+
+
+
+
+\section{Podsumowanie metod}
+
+
+
+\section{Przegląd literatury dotyczącej metod}
+
+
+
+
+
+
+
+\chapter{Wyniki}
+
+
+
+
+
+
+
+
+
+\chapter{Podsumowanie}
+
+%(ocena realizacji celu, odniesienie do pozycji z przeglądu literatury)
+
+
+
+\section{Ocena realizacji celu}
+
+
+\section{Ocena uzyskanych wyników w kontekście literatury przedmiotu}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{thebibliography}{9}
+
+\bibitem{xxxx}
+xx, x. (xxx).
+\textit{xxx}.
+xxx.
+\url{xxxx}
+
+
+\end{thebibliography}
+
+\end{document}
