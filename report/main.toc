@@ -1,0 +1,22 @@
+\babel@toc {polish}{}\relax 
+\contentsline {chapter}{Streszczenie}{2}{chapter*.2}%
+\contentsline {chapter}{\numberline {1}Wstęp}{3}{chapter.1}%
+\contentsline {chapter}{\numberline {2}Przedmiot badania}{4}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Cel i zakres badania}{4}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Wstępna analiza danych}{4}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Zmienne wybrane do analizy}{4}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}Statystyki opisowe i podstawowa wizualizacja}{4}{subsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.2.3}Transformacje Danych}{4}{subsection.2.2.3}%
+\contentsline {subsection}{\numberline {2.2.4}Braki Danych}{4}{subsection.2.2.4}%
+\contentsline {subsection}{\numberline {2.2.5}Obserwacje odstające}{4}{subsection.2.2.5}%
+\contentsline {chapter}{\numberline {3}Opis metod}{5}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Metoda1}{5}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Metoda2}{5}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Metoda3}{5}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Model hybrydowy}{5}{section.3.4}%
+\contentsline {section}{\numberline {3.5}Literatura przedmiotu}{5}{section.3.5}%
+\contentsline {section}{\numberline {3.6}Przegląd literatury dotyczącej metod}{5}{section.3.6}%
+\contentsline {chapter}{\numberline {4}Wyniki}{6}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Mierniki}{6}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Sposób walidacji}{6}{section.4.2}%
+\contentsline {chapter}{\numberline {5}Przykład użycia modeli na stworzonych sztucznie obserwacjach}{7}{chapter.5}%
