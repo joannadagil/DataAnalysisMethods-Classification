@@ -1,0 +1,53 @@
+\begin{table}[H]
+
+\caption{\label{tab:conf-matrix-multinom}Macierz pomyłek dla wielomianowej regresji logistycznej}
+\centering
+\begin{tabular}[t]{lrrrrrrr}
+\toprule
+  & BARBUNYA & BOMBAY & CALI & DERMASON & HOROZ & SEKER & SIRA\\
+\midrule
+BARBUNYA & 358 & 0 & 26 & 0 & 2 & 4 & 7\\
+BOMBAY & 0 & 157 & 0 & 0 & 0 & 0 & 0\\
+CALI & 14 & 1 & 463 & 0 & 10 & 0 & 1\\
+DERMASON & 0 & 0 & 0 & 986 & 5 & 13 & 60\\
+HOROZ & 1 & 0 & 12 & 5 & 540 & 0 & 21\\
+\addlinespace
+SEKER & 2 & 0 & 0 & 9 & 0 & 585 & 13\\
+SIRA & 3 & 0 & 3 & 93 & 4 & 8 & 680\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+
+\caption{\label{tab:accuracy-multinom}Dokładność klasyfikacji dla wielomianowej regresji logistycznej}
+\centering
+\begin{tabular}[t]{lr}
+\toprule
+Metoda & Accuracy\\
+\midrule
+Wielomianowa regresja logistyczna & 0.9224\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+
+\caption{\label{tab:metrics-multinom}Miary jakości klasyfikacji dla wielomianowej regresji logistycznej}
+\centering
+\begin{tabular}[t]{lrrr}
+\toprule
+Klasa & Precision & Recall & F1\\
+\midrule
+BARBUNYA & 0.9471 & 0.9018 & 0.9239\\
+BOMBAY & 0.9937 & 1.0000 & 0.9968\\
+CALI & 0.9187 & 0.9468 & 0.9325\\
+DERMASON & 0.9021 & 0.9267 & 0.9142\\
+HOROZ & 0.9626 & 0.9326 & 0.9474\\
+\addlinespace
+SEKER & 0.9590 & 0.9606 & 0.9598\\
+SIRA & 0.8696 & 0.8597 & 0.8646\\
+\bottomrule
+\end{tabular}
+\end{table}
+

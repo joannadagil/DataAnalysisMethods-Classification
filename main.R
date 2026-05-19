@@ -95,3 +95,6 @@ writeLines(latex_output, latex_output_file)
 cat("Wczytano obserwacji:", nrow(bean_data), "\n")
 cat("Wczytano zmiennych:", ncol(bean_data), "\n\n")
 cat("Zapisano tabele LaTeX w pliku:", latex_output_file, "\n")
+
+
+

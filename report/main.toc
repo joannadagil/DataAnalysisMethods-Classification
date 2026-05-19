@@ -11,13 +11,13 @@
 \contentsline {subsection}{\numberline {2.2.5}Obserwacje odstające}{5}{subsection.2.2.5}%
 \contentsline {chapter}{\numberline {3}Opis metod}{6}{chapter.3}%
 \contentsline {section}{\numberline {3.1}Wielomianowa regresja logistyczna}{6}{section.3.1}%
-\contentsline {section}{\numberline {3.2}LDA - Linear Discriminant Analysis}{6}{section.3.2}%
-\contentsline {section}{\numberline {3.3}QDA - Quadratic Discriminant Analysis}{6}{section.3.3}%
-\contentsline {section}{\numberline {3.4}Naive Bayes}{6}{section.3.4}%
-\contentsline {section}{\numberline {3.5}Random Forest}{6}{section.3.5}%
-\contentsline {section}{\numberline {3.6}SVM - metoda wektorów nośnych}{6}{section.3.6}%
-\contentsline {section}{\numberline {3.7}Przegląd literatury dotyczącej metod}{6}{section.3.7}%
-\contentsline {chapter}{\numberline {4}Wyniki}{7}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Mierniki}{7}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Sposób walidacji}{7}{section.4.2}%
-\contentsline {chapter}{\numberline {5}Przykład użycia modeli na stworzonych sztucznie obserwacjach}{8}{chapter.5}%
+\contentsline {section}{\numberline {3.2}LDA - Linear Discriminant Analysis}{7}{section.3.2}%
+\contentsline {section}{\numberline {3.3}QDA - Quadratic Discriminant Analysis}{8}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Naive Bayes}{9}{section.3.4}%
+\contentsline {section}{\numberline {3.5}Random Forest}{10}{section.3.5}%
+\contentsline {section}{\numberline {3.6}SVM - metoda wektorów nośnych}{10}{section.3.6}%
+\contentsline {section}{\numberline {3.7}Przegląd literatury dotyczącej metod}{10}{section.3.7}%
+\contentsline {chapter}{\numberline {4}Wyniki}{11}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Mierniki}{11}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Sposób walidacji}{11}{section.4.2}%
+\contentsline {chapter}{\numberline {5}Przykład użycia modeli na stworzonych sztucznie obserwacjach}{12}{chapter.5}%

@@ -109,10 +109,18 @@ Adam Włodarski (230983)
 \chapter*{Streszczenie}
 \addcontentsline{toc}{chapter}{Streszczenie}
 
+Repo:
+
+\url{https://github.com/joannadagil/DataAnalysisMethods-Classification.git}
+
+\noindent Dane:
+
+\url{https://archive.ics.uci.edu/dataset/602/dry+bean+dataset}
+
 
 
 \vspace{0.5cm}
-\noindent\textbf{Słowa kluczowe:} klasyfikacja wieloetykietowa
+\noindent\textbf{Słowa kluczowe:} klasyfikacja wieloklasowa
 
 
 % ----------------------------------------------------
@@ -120,18 +128,24 @@ Adam Włodarski (230983)
 \chapter{Wstęp}
 
 
+
+
 % ----------------------------------------------------
 
 
 \chapter{Przedmiot badania}
 
-% ----------------------------------------------------
+
 
 
 \section{Cel i zakres badania}
 
 
 \section{Wstępna analiza danych}
+
+BARBUNYA  \quad BOMBAY   \quad  CALI \quad DERMASON \quad  HOROZ  \quad  SEKER  \quad   SIRA 
+
+1322 \qquad    \qquad  \quad   522 \qquad    1630   \qquad  \qquad  3546  \qquad \quad  1928   \quad \qquad  2027   \qquad  2636 
 
 
 \subsection{Zmienne wybrane do analizy}
@@ -173,26 +187,233 @@ Adam Włodarski (230983)
 
 % minimum trzy metody i stworzenie modelu hybrydowego (np. średnia ważona score’ów z metod), formalnie więc: minimum cztery mechanizmy decyzyjne
 
+\noindent
+W niniejszym rozdziale przedstawiono metody klasyfikacji wykorzystane do rozwiązania problemu przypisania ziaren fasoli do odpowiednich odmian. Analizowany problem ma charakter klasyfikacji wieloklasowej, ponieważ zmienna objaśniana może przyjmować więcej niż dwie możliwe wartości.
+
+Niech zmienna objaśniana $Y$ oznacza klasę, czyli odmianę fasoli. W zbiorze \textit{Dry Bean Dataset} zmienna ta przyjmuje jedną z siedmiu wartości:
+\[
+Y \in \{\textit{SEKER}, \textit{BARBUNYA}, \textit{BOMBAY}, \textit{CALI}, \textit{DERMASON}, \textit{HOROZ}, \textit{SIRA}\}.
+\]
+
+Zmiennymi objaśniającymi są cechy geometryczne i morfologiczne opisujące pojedyncze ziarno fasoli. Dla pojedynczej obserwacji można je zapisać w postaci wektora:
+\[
+X = (X_1, X_2, \ldots, X_p),
+\]
+gdzie $p$ oznacza liczbę zmiennych objaśniających uwzględnionych w analizie.
+
+Celem każdej z zastosowanych metod jest wyznaczenie reguły klasyfikacyjnej, która na podstawie wartości cech $X$ przypisuje obserwację do jednej z klas $Y$. Innymi słowy, dla każdego ziarna fasoli model podejmuje decyzję, do której odmiany jest ono najbardziej podobne ze względu na swoje cechy geometryczne.
+
+W analizie wykorzystano zmienne opisujące między innymi rozmiar, kształt, wydłużenie oraz regularność ziarna. Do cech związanych z rozmiarem należą na przykład \textit{Area}, \textit{Perimeter}, \textit{ConvexArea}, \textit{MajorAxisLength} oraz \textit{MinorAxisLength}. Z kolei cechy takie jak \textit{Eccentricity}, \textit{Roundness}, \textit{Compactness}, \textit{AspectRatio} czy \textit{Solidity} opisują przede wszystkim kształt i proporcje ziarna.
+
+Zastosowane metody różnią się sposobem wyznaczania granic decyzyjnych między klasami. Część z nich, na przykład wielomianowa regresja logistyczna oraz LDA, zakłada liniowy charakter granic między klasami. Inne, takie jak QDA, drzewa decyzyjne, Random Forest czy SVM, pozwalają na bardziej złożone granice decyzyjne. Dzięki temu możliwe jest porównanie zarówno prostszych, bardziej interpretowalnych metod statystycznych, jak i metod bardziej elastycznych.
+
+W dalszej części rozdziału opisano kolejno zastosowane metody klasyfikacji oraz sposób podejmowania przez nie decyzji klasyfikacyjnych.
+
 \section{Wielomianowa regresja logistyczna}
 
-Zakłada, że cechy są niezależne, a w wybranym zbiorze takie nie są.
+% Regresja logistyczna nie wymaga niezależności cech, ale silna współliniowość może utrudniać interpretację współczynników.
 
 
-"The multinomial logistic model assumes that data are case-specific; that is, each independent variable has a single value for each case. As with other types of regression, there is no need for the independent variables to be statistically independent from each other (unlike, for example, in a naive Bayes classifier); however, collinearity is assumed to be relatively low, as it becomes difficult to differentiate between the impact of several variables if this is not the case." wtf
+%"The multinomial logistic model assumes that data are case-specific; that is, each independent variable has a single value for each case. As with other types of regression, there is no need for the independent variables to be statistically independent from each other (unlike, for example, in a naive Bayes classifier); however, collinearity is assumed to be relatively low, as it becomes difficult to differentiate between the impact of several variables if this is not the case." wtf
+
+
+Wielomianowa regresja logistyczna jest rozszerzeniem klasycznej regresji logistycznej na przypadek, w którym zmienna objaśniana przyjmuje więcej niż dwie kategorie. W analizowanym problemie metoda ta służy do oszacowania prawdopodobieństwa przynależności ziarna fasoli do każdej z rozważanych odmian.
+
+Celem wielomianowej regresji logistycznej jest oszacowanie prawdopodobieństwa przynależności obserwacji do każdej z możliwych klas. Dla każdej obserwacji model wyznacza prawdopodobieństwa:
+\[
+P(Y = k \mid X),
+\]
+gdzie $k$ oznacza jedną z klas. Obserwacja zostaje następnie przypisana do tej klasy, dla której przewidywane prawdopodobieństwo jest największe.
+
+W modelu wielomianowej regresji logistycznej jedna z klas jest wybierana jako klasa referencyjna. Dla pozostałych klas modeluje się logarytm ilorazu szans względem tej klasy. Jeżeli jako klasę referencyjną oznaczymy klasę $K$, to dla każdej klasy $k = 1, \ldots, K-1$ model ma postać:
+\[
+\log \left( \frac{P(Y = k \mid X)}{P(Y = K \mid X)} \right)
+=
+\beta_{0k} + \beta_{1k}X_1 + \beta_{2k}X_2 + \ldots + \beta_{pk}X_p.
+\]
+
+Oznacza to, że dla każdej klasy, z wyjątkiem klasy referencyjnej, estymowany jest osobny zestaw współczynników regresji. Współczynniki te opisują wpływ poszczególnych cech ziarna na względne prawdopodobieństwo przypisania obserwacji do danej klasy w porównaniu z klasą referencyjną.
+
+Prawdopodobieństwa przynależności do poszczególnych klas można zapisać w postaci:
+\[
+P(Y = k \mid X)
+=
+\frac{\exp(\beta_{0k} + \beta_{1k}X_1 + \ldots + \beta_{pk}X_p)}
+{1 + \sum_{j=1}^{K-1} \exp(\beta_{0j} + \beta_{1j}X_1 + \ldots + \beta_{pj}X_p)}
+\]
+dla $k = 1, \ldots, K-1$, natomiast dla klasy referencyjnej:
+\[
+P(Y = K \mid X)
+=
+\frac{1}
+{1 + \sum_{j=1}^{K-1} \exp(\beta_{0j} + \beta_{1j}X_1 + \ldots + \beta_{pj}X_p)}.
+\]
+
+W kontekście analizowanego zbioru danych model ten pozwala określić, jak cechy geometryczne ziarna wpływają na prawdopodobieństwo zaklasyfikowania go do konkretnej odmiany fasoli. Przykładowo, cechy związane z rozmiarem ziarna, takie jak \textit{Area}, \textit{Perimeter} czy \textit{MajorAxisLength}, mogą mieć istotne znaczenie przy rozróżnianiu większych odmian fasoli od mniejszych. Z kolei cechy opisujące kształt, takie jak \textit{Roundness}, \textit{Compactness} czy \textit{Eccentricity}, mogą pomagać w odróżnianiu odmian bardziej okrągłych od bardziej wydłużonych.
+
+Klasyfikacja nowej obserwacji odbywa się poprzez obliczenie przewidywanego prawdopodobieństwa dla każdej klasy i wybór klasy o największej wartości tego prawdopodobieństwa:
+\[
+\hat{Y} = \arg\max_{k} P(Y = k \mid X).
+\]
+
+Wielomianowa regresja logistyczna jest metodą parametryczną i stosunkowo łatwą do interpretacji. Jej zaletą jest możliwość uzyskania nie tylko przewidywanej klasy, ale również prawdopodobieństw przynależności do każdej z klas. Dzięki temu można analizować, z jaką pewnością model przypisuje dane ziarno do konkretnej odmiany.
+
+Metoda ta zakłada jednak, że zależność pomiędzy zmiennymi objaśniającymi a logarytmem ilorazu szans jest liniowa. W praktyce oznacza to, że model może gorzej radzić sobie w sytuacjach, gdy granice między klasami mają silnie nieliniowy charakter. W przypadku zbioru \textit{Dry Bean} może to mieć znaczenie, ponieważ niektóre odmiany fasoli mogą być do siebie bardzo podobne pod względem wybranych cech morfologicznych.
+
+W przeprowadzonej analizie wielomianowa regresja logistyczna została wykorzystana jako jedna z metod klasyfikacji statystycznej. Jej wyniki porównano z wynikami pozostałych metod na podstawie miar jakości klasyfikacji, takich jak macierz pomyłek, dokładność klasyfikacji oraz miary precyzji, czułości i wyniku $F_1$.
+
+
+
 
 
 
 \section{LDA - Linear Discriminant Analysis}
 
+Liniowa analiza dyskryminacyjna, czyli LDA, jest jedną z klasycznych metod klasyfikacji statystycznej. Jej celem jest przypisanie obserwacji do jednej z dostępnych klas na podstawie wartości zmiennych objaśniających. W analizowanym zbiorze danych \textit{Dry Bean Dataset} metoda ta służy do klasyfikacji ziaren fasoli do jednej z odmian na podstawie ich cech geometrycznych i morfologicznych.
+
+LDA opiera się na założeniu, że rozkład zmiennych objaśniających w każdej klasie jest wielowymiarowym rozkładem normalnym. Dla klasy $k$ można to zapisać jako:
+\[
+X \mid Y = k \sim N(\mu_k, \Sigma),
+\]
+gdzie $\mu_k$ oznacza wektor średnich cech dla klasy $k$, natomiast $\Sigma$ oznacza wspólną macierz kowariancji dla wszystkich klas.
+
+Istotnym założeniem metody LDA jest więc to, że wszystkie klasy mają taką samą macierz kowariancji. Oznacza to, że chmury punktów odpowiadające poszczególnym klasom mogą mieć różne środki, ale zakłada się, że mają podobny kształt i podobne rozproszenie.
+
+Klasyfikacja w metodzie LDA odbywa się na podstawie funkcji dyskryminacyjnych. Dla każdej klasy $k$ wyznacza się wartość:
+\[
+\delta_k(x)
+=
+x^T \Sigma^{-1} \mu_k
+-
+\frac{1}{2}\mu_k^T \Sigma^{-1}\mu_k
++
+\log \pi_k,
+\]
+gdzie $\pi_k$ oznacza prawdopodobieństwo a priori przynależności obserwacji do klasy $k$.
+
+Nowa obserwacja $x$ zostaje przypisana do tej klasy, dla której funkcja dyskryminacyjna przyjmuje największą wartość:
+\[
+\hat{Y} = \arg\max_k \delta_k(x).
+\]
+
+Ponieważ funkcja dyskryminacyjna $\delta_k(x)$ jest funkcją liniową względem wektora cech $x$, granice decyzyjne między klasami są liniowe. Oznacza to, że metoda LDA najlepiej sprawdza się wtedy, gdy klasy można rozdzielić za pomocą prostych, liniowych granic w przestrzeni cech.
+
+W kontekście zbioru \textit{Dry Bean} metoda LDA próbuje znaleźć takie kombinacje liniowe cech, które najlepiej rozdzielają poszczególne odmiany fasoli. Przykładowo, cechy związane z rozmiarem ziarna, takie jak \textit{Area}, \textit{Perimeter} czy \textit{MajorAxisLength}, mogą pomagać w oddzieleniu większych odmian od mniejszych. Z kolei cechy opisujące kształt, takie jak \textit{Roundness}, \textit{Compactness} czy \textit{Eccentricity}, mogą mieć znaczenie przy rozróżnianiu odmian bardziej okrągłych od bardziej wydłużonych.
+
+Zaletą metody LDA jest jej prostota, interpretowalność oraz stosunkowo niewielka złożoność obliczeniowa. Metoda ta pozwala również analizować, które kierunki w przestrzeni cech najlepiej rozdzielają klasy. Wadą LDA są natomiast dość silne założenia dotyczące rozkładów danych, w szczególności założenie o normalności zmiennych w klasach oraz o wspólnej macierzy kowariancji.
+
+W przypadku zbioru \textit{Dry Bean} założenie o wspólnej macierzy kowariancji może być ograniczeniem, ponieważ różne odmiany fasoli mogą charakteryzować się innym rozproszeniem cech. Na przykład jedna odmiana może być bardzo jednorodna pod względem kształtu i rozmiaru, podczas gdy inna może wykazywać większą zmienność morfologiczną. Mimo to LDA stanowi użyteczną metodę porównawczą, szczególnie ze względu na swoją klasyczną interpretację statystyczną i prostą postać granic decyzyjnych.
 
 
 \section{QDA - Quadratic Discriminant Analysis}
 
+Kwadratowa analiza dyskryminacyjna, czyli QDA, jest metodą klasyfikacji statystycznej blisko związaną z liniową analizą dyskryminacyjną. Podobnie jak LDA, metoda QDA zakłada, że rozkład zmiennych objaśniających w każdej klasie jest wielowymiarowym rozkładem normalnym. Różnica polega jednak na tym, że QDA nie wymaga, aby wszystkie klasy miały tę samą macierz kowariancji.
 
+Dla klasy $k$ zakłada się, że:
+\[
+X \mid Y = k \sim N(\mu_k, \Sigma_k),
+\]
+gdzie $\mu_k$ oznacza wektor średnich cech dla klasy $k$, natomiast $\Sigma_k$ oznacza macierz kowariancji charakterystyczną dla tej klasy.
+
+W przeciwieństwie do LDA, w metodzie QDA każda klasa może mieć własną strukturę zmienności. Oznacza to, że klasy mogą różnić się nie tylko położeniem w przestrzeni cech, ale również kształtem i rozproszeniem chmur punktów. Jest to szczególnie istotne wtedy, gdy analizowane grupy nie mają podobnej wariancji lub gdy granice między nimi nie są liniowe.
+
+Funkcja dyskryminacyjna dla klasy $k$ w metodzie QDA ma postać:
+\[
+\delta_k(x)
+=
+-\frac{1}{2}\log |\Sigma_k|
+-
+\frac{1}{2}(x-\mu_k)^T \Sigma_k^{-1}(x-\mu_k)
++
+\log \pi_k,
+\]
+gdzie $\pi_k$ oznacza prawdopodobieństwo a priori przynależności obserwacji do klasy $k$.
+
+Nowa obserwacja $x$ jest klasyfikowana do tej klasy, dla której funkcja dyskryminacyjna osiąga największą wartość:
+\[
+\hat{Y} = \arg\max_k \delta_k(x).
+\]
+
+Ze względu na obecność składnika kwadratowego
+\[
+(x-\mu_k)^T \Sigma_k^{-1}(x-\mu_k),
+\]
+granice decyzyjne w metodzie QDA są na ogół krzywoliniowe. Oznacza to, że QDA jest metodą bardziej elastyczną niż LDA i może lepiej dopasować się do sytuacji, w której klasy są rozdzielone w sposób nieliniowy.
+
+W kontekście zbioru \textit{Dry Bean} metoda QDA może być przydatna, ponieważ różne odmiany fasoli mogą mieć odmienne rozkłady cech. Przykładowo, odmiana \textit{BOMBAY} może być stosunkowo łatwa do odróżnienia ze względu na większy rozmiar ziaren, natomiast odmiany takie jak \textit{DERMASON} i \textit{SIRA} mogą być do siebie bardziej podobne i częściowo nakładać się w przestrzeni cech. W takiej sytuacji możliwość tworzenia nieliniowych granic decyzyjnych może poprawić jakość klasyfikacji.
+
+Zaletą QDA jest większa elastyczność w porównaniu z LDA. Metoda ta może lepiej radzić sobie w przypadku klas o różnym rozproszeniu i różnych kształtach rozkładów. Wadą jest natomiast większa liczba estymowanych parametrów, ponieważ dla każdej klasy osobno estymowana jest macierz kowariancji. Może to prowadzić do mniej stabilnych wyników, szczególnie wtedy, gdy liczba obserwacji w niektórych klasach jest niewielka lub gdy zmienne objaśniające są silnie skorelowane.
+
+W zbiorze \textit{Dry Bean} wiele cech opisujących ziarna jest ze sobą naturalnie powiązanych. Przykładowo, większe ziarna mają zwykle większe wartości zmiennych takich jak \textit{Area}, \textit{Perimeter}, \textit{MajorAxisLength} czy \textit{ConvexArea}. Silna współzależność zmiennych może wpływać na stabilność estymacji macierzy kowariancji w metodzie QDA.
+
+Podsumowując, QDA można traktować jako bardziej elastyczne rozszerzenie LDA. LDA zakłada wspólną macierz kowariancji dla wszystkich klas i prowadzi do liniowych granic decyzyjnych, natomiast QDA dopuszcza osobne macierze kowariancji dla każdej klasy i umożliwia tworzenie granic krzywoliniowych. W przeprowadzonej analizie obie metody zostały wykorzystane w celu porównania skuteczności klasycznych metod dyskryminacyjnych w problemie klasyfikacji odmian fasoli.
+
+
+
+
+
+% ---------------------------------------------------------------
 
 \section{Naive Bayes}
 
-Zakłada, że cechy są niezależne, a w wybranym zbiorze takie nie są.
+%Zakłada, że cechy są niezależne, a w wybranym zbiorze takie nie są.
+
+Naiwny klasyfikator Bayesa jest probabilistyczną metodą klasyfikacji opartą na twierdzeniu Bayesa. Celem metody jest wyznaczenie prawdopodobieństwa przynależności obserwacji do każdej z klas na podstawie wartości zmiennych objaśniających, a następnie przypisanie obserwacji do klasy o największym prawdopodobieństwie a posteriori.
+
+Zgodnie z twierdzeniem Bayesa prawdopodobieństwo przynależności obserwacji o wektorze cech $X$ do klasy $k$ można zapisać jako:
+\[
+P(Y = k \mid X)
+=
+\frac{P(X \mid Y = k)P(Y = k)}{P(X)}.
+\]
+
+W powyższym wzorze $P(Y = k \mid X)$ oznacza prawdopodobieństwo a posteriori przynależności obserwacji do klasy $k$, $P(X \mid Y = k)$ oznacza prawdopodobieństwo zaobserwowania danego zestawu cech w klasie $k$, natomiast $P(Y = k)$ jest prawdopodobieństwem a priori wystąpienia klasy $k$.
+
+Ponieważ mianownik $P(X)$ jest taki sam dla wszystkich klas, przy klasyfikacji można porównywać jedynie wartości licznika:
+\[
+P(Y = k \mid X) \propto P(X \mid Y = k)P(Y = k).
+\]
+
+Nowa obserwacja zostaje przypisana do tej klasy, dla której powyższe wyrażenie przyjmuje największą wartość:
+\[
+\hat{Y}
+=
+\arg\max_k P(X \mid Y = k)P(Y = k).
+\]
+
+Nazwa metody wynika z jej podstawowego założenia, nazywanego założeniem naiwnym. Zakłada się mianowicie, że zmienne objaśniające są warunkowo niezależne przy znanej klasie. Oznacza to, że po ustaleniu klasy $Y = k$ każda cecha $X_j$ jest traktowana jako niezależna od pozostałych cech. Wtedy prawdopodobieństwo $P(X \mid Y = k)$ można zapisać jako iloczyn prawdopodobieństw dla poszczególnych zmiennych:
+\[
+P(X \mid Y = k)
+=
+P(X_1, X_2, \ldots, X_p \mid Y = k)
+\approx
+\prod_{j=1}^{p} P(X_j \mid Y = k).
+\]
+
+W konsekwencji reguła klasyfikacyjna przyjmuje postać:
+\[
+\hat{Y}
+=
+\arg\max_k
+P(Y = k)
+\prod_{j=1}^{p} P(X_j \mid Y = k).
+\]
+
+W analizowanym zbiorze \textit{Dry Bean Dataset} zmienne objaśniające mają charakter ilościowy, ponieważ opisują geometryczne i morfologiczne cechy ziaren fasoli. Z tego względu w praktyce stosuje się najczęściej gaussowską wersję naiwnego klasyfikatora Bayesa. Zakłada ona, że rozkład każdej zmiennej objaśniającej w obrębie danej klasy jest rozkładem normalnym:
+\[
+X_j \mid Y = k \sim N(\mu_{jk}, \sigma_{jk}^2),
+\]
+gdzie $\mu_{jk}$ oznacza średnią wartość cechy $X_j$ w klasie $k$, natomiast $\sigma_{jk}^2$ oznacza wariancję tej cechy w klasie $k$.
+
+Dla każdej klasy oraz każdej cechy estymowane są więc osobne parametry rozkładu normalnego. Następnie dla nowej obserwacji model oblicza, jak prawdopodobne są zaobserwowane wartości cech przy założeniu, że obserwacja pochodzi z danej klasy. Na tej podstawie wyznaczane jest prawdopodobieństwo przynależności do każdej odmiany fasoli.
+
+W kontekście klasyfikacji ziaren fasoli metoda Naive Bayes sprawdza więc, dla której odmiany najbardziej prawdopodobne są obserwowane wartości takich cech jak \textit{Area}, \textit{Perimeter}, \textit{MajorAxisLength}, \textit{MinorAxisLength}, \textit{Roundness}, \textit{Compactness} czy \textit{Eccentricity}. Przykładowo, jeżeli dane ziarno ma duże wartości cech związanych z rozmiarem, model może przypisać mu większe prawdopodobieństwo przynależności do odmiany charakteryzującej się większymi ziarnami.
+
+Zaletą naiwnego klasyfikatora Bayesa jest prostota, niewielka złożoność obliczeniowa oraz możliwość uzyskania probabilistycznej interpretacji wyników. Metoda ta może być stosowana jako punkt odniesienia dla bardziej złożonych klasyfikatorów, ponieważ jest szybka i łatwa do implementacji.
+
+Głównym ograniczeniem metody jest założenie warunkowej niezależności cech. W przypadku zbioru \textit{Dry Bean} założenie to jest dość silne, ponieważ wiele zmiennych opisujących ziarna jest ze sobą naturalnie powiązanych. Przykładowo, większe ziarna mają zwykle jednocześnie większe wartości zmiennych takich jak \textit{Area}, \textit{Perimeter}, \textit{MajorAxisLength} czy \textit{ConvexArea}. Podobnie cechy opisujące kształt, takie jak \textit{Roundness}, \textit{Compactness} i \textit{Eccentricity}, również mogą być ze sobą skorelowane.
+
+Z tego powodu naiwny klasyfikator Bayesa może nie wykorzystywać w pełni zależności występujących między zmiennymi. Mimo to metoda została uwzględniona w analizie jako klasyczny probabilistyczny klasyfikator, którego wyniki można porównać z metodami bardziej elastycznymi, takimi jak QDA, Random Forest czy SVM.
 
 \section{Random Forest}
 
@@ -212,6 +433,8 @@ Zakłada, że cechy są niezależne, a w wybranym zbiorze takie nie są.
 % ----------------------------------------------------
 
 \chapter{Wyniki}
+
+\input{wyniki_regresja_logistyczna.tex}
 
 \section{Mierniki}
 
