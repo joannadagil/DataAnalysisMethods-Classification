@@ -98,3 +98,181 @@ cat("Zapisano tabele LaTeX w pliku:", latex_output_file, "\n")
 
 
 
+# 2.2.3 Transformacje danych
+
+library(dplyr)
+library(ggplot2)
+
+selected_variables <- c(
+  "Area",
+  "Perimeter",
+  "MajorAxisLength",
+  "MinorAxisLength",
+  "ConvexArea",
+  "EquivDiameter",
+  "Eccentricity",
+  "roundness",
+  "Compactness",
+  "Solidity",
+  "AspectRation",
+  "Extent"
+)
+
+bean_selected <- bean_data[, c(selected_variables, "Class")]
+
+# Analiza skośności
+skewness_values <- sapply(
+  bean_selected[selected_variables],
+  moments::skewness,
+  na.rm = TRUE
+)
+
+skewness_table <- data.frame(
+  Zmienna = names(skewness_values),
+  Skosnosc = round(skewness_values, 4)
+)
+
+print(skewness_table)
+
+# Transformacja logarytmiczna
+high_skew_vars <- names(skewness_values[abs(skewness_values) > 1])
+
+bean_transformed <- bean_selected
+
+for (var in high_skew_vars) {
+  bean_transformed[[var]] <- log(bean_transformed[[var]])
+}
+
+cat("\nZmienne po log-transformacji:\n")
+print(high_skew_vars)
+
+bean_processed <- bean_transformed
+
+
+# 2.2.5 Obserwacje odstające
+
+outlier_indices_iqr <- c()
+
+for (var in selected_variables) {
+  
+  q1 <- quantile(bean_processed[[var]], 0.25, na.rm = TRUE)
+  q3 <- quantile(bean_processed[[var]], 0.75, na.rm = TRUE)
+  
+  iqr_value <- q3 - q1
+  
+  lower_bound <- q1 - 1.5 * iqr_value
+  upper_bound <- q3 + 1.5 * iqr_value
+  
+  outliers <- which(
+    bean_processed[[var]] < lower_bound |
+      bean_processed[[var]] > upper_bound
+  )
+  
+  outlier_indices_iqr <- union(outlier_indices_iqr, outliers)
+  
+  ggplot(bean_processed, aes(y = .data[[var]])) +
+    geom_boxplot(fill = "lightblue") +
+    ggtitle(paste("Boxplot:", var))
+}
+
+cat("\nLiczba outlierów (IQR):", length(outlier_indices_iqr), "\n")
+
+
+# Mahalanobis
+
+numeric_data <- bean_processed[, selected_variables]
+
+cov_matrix <- cov(numeric_data) + diag(1e-6, ncol(numeric_data))
+mean_vector <- colMeans(numeric_data)
+
+mahalanobis_distance <- mahalanobis(
+  numeric_data,
+  center = mean_vector,
+  cov = cov_matrix
+)
+
+threshold <- qchisq(0.999, df = length(selected_variables))
+
+outlier_indices_mahal <- which(mahalanobis_distance > threshold)
+
+cat("\nLiczba outlierów (Mahalanobis):", length(outlier_indices_mahal), "\n")
+
+
+# Łączenie outlierów
+all_outliers <- union(outlier_indices_iqr, outlier_indices_mahal)
+
+cat("\nŁączna liczba outlierów:", length(all_outliers), "\n")
+
+
+# Usuwanie outlierów
+bean_clean <- bean_processed[-all_outliers, ]
+
+cat("\nLiczba obserwacji po czyszczeniu:", nrow(bean_clean), "\n")
+
+
+# FINALNE SKALOWANIE (PO CZYSZCZENIU)
+
+bean_scaled <- data.frame(
+  scale(bean_clean[, selected_variables])
+)
+
+bean_scaled$Class <- bean_clean$Class
+
+cat("\nDane zostały przeskalowane po usunięciu obserwacji odstających.\n")
+
+
+# STATYSTYKI DLA OCZYSZCZONYCH DANYCH
+
+numeric_columns_clean <- names(bean_scaled)[
+  sapply(bean_scaled, is.numeric)
+]
+
+categorical_columns_clean <- names(bean_scaled)[
+  !names(bean_scaled) %in% numeric_columns_clean
+]
+
+numeric_summary_clean <- data.frame(
+  Zmienna = numeric_columns_clean,
+  Srednia = sapply(bean_scaled[numeric_columns_clean], mean, na.rm = TRUE),
+  Mediana = sapply(bean_scaled[numeric_columns_clean], median, na.rm = TRUE),
+  Minimum = sapply(bean_scaled[numeric_columns_clean], min, na.rm = TRUE),
+  Maksimum = sapply(bean_scaled[numeric_columns_clean], max, na.rm = TRUE),
+  OdchylenieStandardowe = sapply(bean_scaled[numeric_columns_clean], sd, na.rm = TRUE),
+  Skosnosc = sapply(bean_scaled[numeric_columns_clean], moments::skewness, na.rm = TRUE),
+  row.names = NULL
+)
+
+numeric_summary_clean[-1] <- lapply(numeric_summary_clean[-1], round, 4)
+
+latex_tables_clean <- list(
+  knitr::kable(
+    numeric_summary_clean,
+    format = "latex",
+    booktabs = TRUE,
+    caption = "Statystyki opisowe po preprocessingu (po czyszczeniu i standaryzacji)"
+  )
+)
+
+for (column_name in categorical_columns_clean) {
+  
+  frequency_table <- as.data.frame(
+    table(bean_scaled[[column_name]], useNA = "ifany")
+  )
+  
+  names(frequency_table) <- c(column_name, "liczebnosc")
+  
+  latex_tables_clean[[length(latex_tables_clean) + 1]] <-
+    knitr::kable(
+      frequency_table,
+      format = "latex",
+      booktabs = TRUE,
+      caption = paste("Liczebnosci dla", column_name)
+    )
+}
+
+latex_output_clean <- unlist(lapply(latex_tables_clean, function(x) c(x, "")))
+
+writeLines(
+  latex_output_clean,
+  file.path(report_dir, "tabele_statystyki_opisowe_clean.tex")
+)

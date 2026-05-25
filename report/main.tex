@@ -214,16 +214,42 @@ Analiza statystyk opisowych wskazuje na występowanie silnej asymetrii prawostro
 
 \subsection{Transformacje danych}
 
-Z uwagi na fakt, że cechy gabarytowe przyjmują wartości rzędu dziesiątek tysięcy, a bezwymiarowe współczynniki kształtu mieszczą się w wąskim przedziale $(0, 1)$, bezpośrednie zastosowanie metod opartych na odległościach (jak SVM) lub analizy kowariancji (LDA/QDA) byłoby zdominowane przez zmienne o największych barierach skali. W celu ujednolicenia wpływu wszystkich cech na proces klasyfikacji zastosowano standaryzację (centrowanie i skalowanie), przekształcając każdą zmienną tak, aby jej średnia wynosiła 0, a odchylenie standardowe było równe 1. Ponadto dla zmiennych o najwyższym współczynniku skośności uzasadnione jest rozważenie transformacji logarytmicznej przed ostatecznym skalowaniem.
+Z uwagi na fakt, że cechy gabarytowe przyjmują wartości rzędu dziesiątek tysięcy, a bezwymiarowe współczynniki kształtu mieszczą się w wąskim przedziale $(0,1)$, bezpośrednie zastosowanie metod opartych na odległościach lub analizie kowariancji mogłoby prowadzić do dominacji zmiennych o największej skali wartości. W celu ujednolicenia wpływu wszystkich cech na proces klasyfikacji przeprowadzono preprocessing danych obejmujący transformację logarytmiczną oraz standaryzację.
+
+W pierwszym etapie przeanalizowano asymetrię rozkładów wszystkich wybranych zmiennych numerycznych za pomocą współczynnika skośności. Zmienne charakteryzujące się wysoką asymetrią prawostronną, w szczególności zmienne gabarytowe takie jak \texttt{Area}, \texttt{ConvexArea}, \texttt{Perimeter}, \texttt{MajorAxisLength}, \texttt{MinorAxisLength} oraz \texttt{EquivDiameter}, zostały poddane transformacji logarytmicznej, co pozwoliło ograniczyć wpływ wartości ekstremalnych oraz zmniejszyć asymetrię rozkładów.
+
+Następnie zastosowano procedurę usuwania obserwacji odstających opisaną w kolejnym podrozdziale. Standaryzację danych przeprowadzono dopiero na etapie końcowym, już po oczyszczeniu zbioru, poprzez centrowanie i skalowanie cech numerycznych.
+
+Dzięki temu każda zmienna w końcowym zbiorze uzyskała średnią równą 0 oraz odchylenie standardowe równe 1, co jest zgodne z definicją standaryzacji Z-score.
+
+Standaryzacja była szczególnie istotna z punktu widzenia metod takich jak SVM, LDA oraz QDA, które są wrażliwe na różnice skali pomiędzy zmiennymi oraz strukturę macierzy kowariancji.
 
 \subsection{Braki danych}
 
-Zbiór danych poddano weryfikacji pod kątem występowania brakujących wartości (rekordów typu \textit{NA} lub pustych komórek). Ze względu na to, że dane zostały wygenerowane automatycznie przez dedykowane oprogramowanie do segmentacji i ekstrakcji cech obrazu cyfrowego, zbiór jest kompletny i nie zawiera żadnych braków danych we wskazanych 12 zmiennych, co eliminuje konieczność stosowania algorytmów imputacji.
+Zbiór danych poddano weryfikacji pod kątem występowania brakujących wartości. Dane nie zawierają braków, co eliminuje konieczność stosowania imputacji.
 
 \subsection{Obserwacje odstające}
 
-Fizyczna natura obiektów biologicznych dopuszcza występowanie anomalii rozwojowych (np. ziarna uszkodzone mechanicznie, zniekształcone lub niedorozwinięte). Identyfikacji obserwacji odstających dokonano przy użyciu reguły 1.5 rozstępu ćwiartkowego (IQR) na wykresach pudełkowych oraz wielowymiarowej analizy odległości Mahalanobisa. Obserwacje skrajnie nietypowe, będące najczęściej wynikiem błędów automatycznej segmentacji obrazu (np. złączenie dwóch nakładających się ziaren w jeden obiekt), zostały usunięte ze zbioru treningowego, aby zapobiec zaburzeniu granic decyzyjnych budowanych klasyfikatorów.
+Fizyczna natura obiektów biologicznych dopuszcza występowanie anomalii rozwojowych, takich jak ziarna uszkodzone mechanicznie, zdeformowane lub niepoprawnie wysegmentowane podczas przetwarzania obrazu. W celu identyfikacji obserwacji odstających zastosowano dwa niezależne podejścia: regułę 1.5 IQR oraz odległość Mahalanobisa.
 
+W pierwszym etapie dla każdej zmiennej numerycznej wyznaczono granice:
+\[
+[Q1 - 1.5 \cdot IQR,\; Q3 + 1.5 \cdot IQR]
+\]
+gdzie $Q1$ i $Q3$ oznaczają kwartyle, a $IQR$ rozstęp międzykwartylowy. Obserwacje poza tym zakresem uznano za odstające w ujęciu jednowymiarowym.
+
+W drugim etapie zastosowano analizę wielowymiarową opartą na odległości Mahalanobisa. Ze względu na silne korelacje między zmiennymi macierz kowariancji była bliska osobliwej, dlatego zastosowano jej regularizację poprzez dodanie małej wartości do przekątnej.
+
+Za obserwacje odstające uznano rekordy wskazane przez co najmniej jedną metodę. Następnie zostały one usunięte ze zbioru danych.
+
+W tabeli \ref{tab:clean-stats} przedstawiono statystyki opisowe dla danych po oczyszczeniu.
+
+\begin{table}[H]
+\centering
+\input{tabele_statystyki_opisowe_clean.tex}
+\caption{Statystyki opisowe po preprocessingu (dane oczyszczone)}
+\label{tab:clean-stats}
+\end{table}
 
 
 
