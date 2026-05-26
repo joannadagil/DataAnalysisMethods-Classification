@@ -153,26 +153,49 @@ bean_processed <- bean_transformed
 
 outlier_indices_iqr <- c()
 
-for (var in selected_variables) {
+outlier_indices_iqr <- c()
+
+for (class_name in unique(bean_processed$Class)) {
   
-  q1 <- quantile(bean_processed[[var]], 0.25, na.rm = TRUE)
-  q3 <- quantile(bean_processed[[var]], 0.75, na.rm = TRUE)
+  class_subset <- bean_processed[
+    bean_processed$Class == class_name,
+  ]
   
-  iqr_value <- q3 - q1
-  
-  lower_bound <- q1 - 1.5 * iqr_value
-  upper_bound <- q3 + 1.5 * iqr_value
-  
-  outliers <- which(
-    bean_processed[[var]] < lower_bound |
-      bean_processed[[var]] > upper_bound
+  class_indices <- which(
+    bean_processed$Class == class_name
   )
   
-  outlier_indices_iqr <- union(outlier_indices_iqr, outliers)
-  
-  ggplot(bean_processed, aes(y = .data[[var]])) +
-    geom_boxplot(fill = "lightblue") +
-    ggtitle(paste("Boxplot:", var))
+  for (var in selected_variables) {
+    
+    q1 <- quantile(
+      class_subset[[var]],
+      0.25,
+      na.rm = TRUE
+    )
+    
+    q3 <- quantile(
+      class_subset[[var]],
+      0.75,
+      na.rm = TRUE
+    )
+    
+    iqr_value <- q3 - q1
+    
+    lower_bound <- q1 - 1.5 * iqr_value
+    upper_bound <- q3 + 1.5 * iqr_value
+    
+    local_outliers <- which(
+      class_subset[[var]] < lower_bound |
+        class_subset[[var]] > upper_bound
+    )
+    
+    global_outliers <- class_indices[local_outliers]
+    
+    outlier_indices_iqr <- union(
+      outlier_indices_iqr,
+      global_outliers
+    )
+  }
 }
 
 cat("\nLiczba outlierów (IQR):", length(outlier_indices_iqr), "\n")
@@ -200,6 +223,7 @@ cat("\nLiczba outlierów (Mahalanobis):", length(outlier_indices_mahal), "\n")
 
 # Łączenie outlierów
 all_outliers <- union(outlier_indices_iqr, outlier_indices_mahal)
+#all_outliers <- outlier_indices_iqr
 
 cat("\nŁączna liczba outlierów:", length(all_outliers), "\n")
 
@@ -255,15 +279,15 @@ latex_tables_clean <- list(
 
 for (column_name in categorical_columns_clean) {
   
-  frequency_table <- as.data.frame(
+  new_frequency_table <- as.data.frame(
     table(bean_scaled[[column_name]], useNA = "ifany")
   )
   
-  names(frequency_table) <- c(column_name, "liczebnosc")
+  names(new_frequency_table) <- c(column_name, "liczebnosc")
   
   latex_tables_clean[[length(latex_tables_clean) + 1]] <-
     knitr::kable(
-      frequency_table,
+      new_frequency_table,
       format = "latex",
       booktabs = TRUE,
       caption = paste("Liczebnosci dla", column_name)
