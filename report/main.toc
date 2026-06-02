@@ -5,19 +5,20 @@
 \contentsline {section}{\numberline {2.1}Cel i zakres badania}{4}{section.2.1}%
 \contentsline {section}{\numberline {2.2}Wstępna analiza danych}{4}{section.2.2}%
 \contentsline {subsection}{\numberline {2.2.1}Zmienne wybrane do analizy}{4}{subsection.2.2.1}%
-\contentsline {subsection}{\numberline {2.2.2}Statystyki opisowe i podstawowa wizualizacja}{4}{subsection.2.2.2}%
-\contentsline {subsection}{\numberline {2.2.3}Transformacje Danych}{5}{subsection.2.2.3}%
-\contentsline {subsection}{\numberline {2.2.4}Braki Danych}{5}{subsection.2.2.4}%
-\contentsline {subsection}{\numberline {2.2.5}Obserwacje odstające}{5}{subsection.2.2.5}%
-\contentsline {chapter}{\numberline {3}Opis metod}{6}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Wielomianowa regresja logistyczna}{6}{section.3.1}%
-\contentsline {section}{\numberline {3.2}LDA - Linear Discriminant Analysis}{7}{section.3.2}%
-\contentsline {section}{\numberline {3.3}QDA - Quadratic Discriminant Analysis}{8}{section.3.3}%
-\contentsline {section}{\numberline {3.4}Naive Bayes}{9}{section.3.4}%
-\contentsline {section}{\numberline {3.5}Random Forest}{10}{section.3.5}%
-\contentsline {section}{\numberline {3.6}SVM - metoda wektorów nośnych}{10}{section.3.6}%
-\contentsline {section}{\numberline {3.7}Przegląd literatury dotyczącej metod}{10}{section.3.7}%
-\contentsline {chapter}{\numberline {4}Wyniki}{11}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Mierniki}{11}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Sposób walidacji}{11}{section.4.2}%
-\contentsline {chapter}{\numberline {5}Przykład użycia modeli na stworzonych sztucznie obserwacjach}{12}{chapter.5}%
+\contentsline {subsection}{\numberline {2.2.2}Statystyki opisowe i podstawowa wizualizacja}{5}{subsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.2.3}Transformacje danych}{5}{subsection.2.2.3}%
+\contentsline {subsection}{\numberline {2.2.4}Braki danych}{6}{subsection.2.2.4}%
+\contentsline {subsection}{\numberline {2.2.5}Obserwacje odstające}{6}{subsection.2.2.5}%
+\contentsline {subsection}{\numberline {2.2.6}Statystyki opisowe i podstawowa wizualizacja}{7}{subsection.2.2.6}%
+\contentsline {subsection}{\numberline {2.2.7}Transformacje Danych}{7}{subsection.2.2.7}%
+\contentsline {chapter}{\numberline {3}Opis metod}{10}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Wielomianowa regresja logistyczna}{10}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Random Forest}{11}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Sieć neuronowa}{11}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Metoda hybrydowa}{11}{section.3.4}%
+\contentsline {section}{\numberline {3.5}Przegląd literatury dotyczącej metod}{11}{section.3.5}%
+\contentsline {chapter}{\numberline {4}Wyniki}{13}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Mierniki}{13}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Sposób walidacji}{13}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Wielomianowa regresja logistyczna}{13}{section.4.3}%
+\contentsline {chapter}{\numberline {5}Przykład użycia modeli na stworzonych sztucznie obserwacjach}{14}{chapter.5}%

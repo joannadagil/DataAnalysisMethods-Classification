@@ -226,7 +226,7 @@ Standaryzacja była szczególnie istotna z punktu widzenia metod takich jak SVM,
 
 \subsection{Braki danych}
 
-Zbiór danych poddano weryfikacji pod kątem występowania brakujących wartości. Dane nie zawierają braków, co eliminuje konieczność stosowania imputacji.
+Wybrany zbiór danych został otrzymany przez wykorzystanie wizji komputerowej zutomatycznie uzyskującej ze zdjęć komplet wszystkich cech. W otzymanych danych nie występują więc żadne braki. Dodatkowo poddano weryfikacji pod kątem występowania brakujących wartości. Potwierdzono kompletność cech we wszystkich pozycjach, co eliminuje konieczność stosowania imputacji.
 
 \subsection{Obserwacje odstające}
 
@@ -242,16 +242,38 @@ W drugim etapie zastosowano analizę wielowymiarową opartą na odległości Mah
 
 Za obserwacje odstające uznano rekordy wskazane przez co najmniej jedną metodę. Następnie zostały one usunięte ze zbioru danych.
 
-W tabeli \ref{tab:clean-stats} przedstawiono statystyki opisowe dla danych po oczyszczeniu.
-
-\begin{table}[H]
-\centering
-\input{tabele_statystyki_opisowe_clean.tex}
-\end{table}
+%W tabeli \ref{tab:clean-stats} przedstawiono statystyki opisowe dla danych po oczyszczeniu.
 
 
+% TODO: to wam działa? bo mi wywala i się nie kompiluje latex cały więc zakomentowałam
+% \begin{table}[H]
+% \centering
+% \input{tabele_statystyki_opisowe_clean.tex}
+% \end{table}
 
 
+\subsection{Statystyki opisowe i podstawowa wizualizacja}
+
+\input{tabele_statystyki_opisowe.tex}
+
+\subsection{Transformacje Danych}
+
+% (skalowanie, logarytmowanie)
+
+
+Dane zostały następnie podzielone na zbiory testowe i treningowe z zachowaniem proporcji klas.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{proporcje_klas_original_train_test.pdf}
+    \caption{Porównanie proporcji klas w całym zbiorze danych, zbiorze uczącym i zbiorze testowym.}
+    \label{fig:proporcje-klas}
+\end{figure}
+
+Następnie zmienne numeryczne zostały przeskalowane oddzielnie dla zbioru uczącego i testowego, z wykorzystaniem parametrów ze zbioru uczącego. 
+
+
+\input{tabele_statystyki_opisowe_przeskalowane.tex}
 
 
 % ----------------------------------------------------
@@ -341,86 +363,88 @@ W przeprowadzonej analizie wielomianowa regresja logistyczna została wykorzysta
 
 
 
-\section{LDA - Linear Discriminant Analysis}
+% \section{LDA - Linear Discriminant Analysis}
 
-Liniowa analiza dyskryminacyjna, czyli LDA, jest jedną z klasycznych metod klasyfikacji statystycznej. Jej celem jest przypisanie obserwacji do jednej z dostępnych klas na podstawie wartości zmiennych objaśniających. W analizowanym zbiorze danych \textit{Dry Bean Dataset} metoda ta służy do klasyfikacji ziaren fasoli do jednej z odmian na podstawie ich cech geometrycznych i morfologicznych.
+% Liniowa analiza dyskryminacyjna, czyli LDA, jest jedną z klasycznych metod klasyfikacji statystycznej. Jej celem jest przypisanie obserwacji do jednej z dostępnych klas na podstawie wartości zmiennych objaśniających. W analizowanym zbiorze danych \textit{Dry Bean Dataset} metoda ta służy do klasyfikacji ziaren fasoli do jednej z odmian na podstawie ich cech geometrycznych i morfologicznych.
 
-LDA opiera się na założeniu, że rozkład zmiennych objaśniających w każdej klasie jest wielowymiarowym rozkładem normalnym. Dla klasy $k$ można to zapisać jako:
-\[
-X \mid Y = k \sim N(\mu_k, \Sigma),
-\]
-gdzie $\mu_k$ oznacza wektor średnich cech dla klasy $k$, natomiast $\Sigma$ oznacza wspólną macierz kowariancji dla wszystkich klas.
+% LDA opiera się na założeniu, że rozkład zmiennych objaśniających w każdej klasie jest wielowymiarowym rozkładem normalnym. Dla klasy $k$ można to zapisać jako:
+% \[
+% X \mid Y = k \sim N(\mu_k, \Sigma),
+% \]
+% gdzie $\mu_k$ oznacza wektor średnich cech dla klasy $k$, natomiast $\Sigma$ oznacza wspólną macierz kowariancji dla wszystkich klas.
 
-Istotnym założeniem metody LDA jest więc to, że wszystkie klasy mają taką samą macierz kowariancji. Oznacza to, że chmury punktów odpowiadające poszczególnym klasom mogą mieć różne środki, ale zakłada się, że mają podobny kształt i podobne rozproszenie.
+% Istotnym założeniem metody LDA jest więc to, że wszystkie klasy mają taką samą macierz kowariancji. Oznacza to, że chmury punktów odpowiadające poszczególnym klasom mogą mieć różne środki, ale zakłada się, że mają podobny kształt i podobne rozproszenie.
 
-Klasyfikacja w metodzie LDA odbywa się na podstawie funkcji dyskryminacyjnych. Dla każdej klasy $k$ wyznacza się wartość:
-\[
-\delta_k(x)
-=
-x^T \Sigma^{-1} \mu_k
--
-\frac{1}{2}\mu_k^T \Sigma^{-1}\mu_k
-+
-\log \pi_k,
-\]
-gdzie $\pi_k$ oznacza prawdopodobieństwo a priori przynależności obserwacji do klasy $k$.
+% Klasyfikacja w metodzie LDA odbywa się na podstawie funkcji dyskryminacyjnych. Dla każdej klasy $k$ wyznacza się wartość:
+% \[
+% \delta_k(x)
+% =
+% x^T \Sigma^{-1} \mu_k
+% -
+% \frac{1}{2}\mu_k^T \Sigma^{-1}\mu_k
+% +
+% \log \pi_k,
+% \]
+% gdzie $\pi_k$ oznacza prawdopodobieństwo a priori przynależności obserwacji do klasy $k$.
 
-Nowa obserwacja $x$ zostaje przypisana do tej klasy, dla której funkcja dyskryminacyjna przyjmuje największą wartość:
-\[
-\hat{Y} = \arg\max_k \delta_k(x).
-\]
+% Nowa obserwacja $x$ zostaje przypisana do tej klasy, dla której funkcja dyskryminacyjna przyjmuje największą wartość:
+% \[
+% \hat{Y} = \arg\max_k \delta_k(x).
+% \]
 
-Ponieważ funkcja dyskryminacyjna $\delta_k(x)$ jest funkcją liniową względem wektora cech $x$, granice decyzyjne między klasami są liniowe. Oznacza to, że metoda LDA najlepiej sprawdza się wtedy, gdy klasy można rozdzielić za pomocą prostych, liniowych granic w przestrzeni cech.
+% Ponieważ funkcja dyskryminacyjna $\delta_k(x)$ jest funkcją liniową względem wektora cech $x$, granice decyzyjne między klasami są liniowe. Oznacza to, że metoda LDA najlepiej sprawdza się wtedy, gdy klasy można rozdzielić za pomocą prostych, liniowych granic w przestrzeni cech.
 
-W kontekście zbioru \textit{Dry Bean} metoda LDA próbuje znaleźć takie kombinacje liniowe cech, które najlepiej rozdzielają poszczególne odmiany fasoli. Przykładowo, cechy związane z rozmiarem ziarna, takie jak \textit{Area}, \textit{Perimeter} czy \textit{MajorAxisLength}, mogą pomagać w oddzieleniu większych odmian od mniejszych. Z kolei cechy opisujące kształt, takie jak \textit{Roundness}, \textit{Compactness} czy \textit{Eccentricity}, mogą mieć znaczenie przy rozróżnianiu odmian bardziej okrągłych od bardziej wydłużonych.
+% W kontekście zbioru \textit{Dry Bean} metoda LDA próbuje znaleźć takie kombinacje liniowe cech, które najlepiej rozdzielają poszczególne odmiany fasoli. Przykładowo, cechy związane z rozmiarem ziarna, takie jak \textit{Area}, \textit{Perimeter} czy \textit{MajorAxisLength}, mogą pomagać w oddzieleniu większych odmian od mniejszych. Z kolei cechy opisujące kształt, takie jak \textit{Roundness}, \textit{Compactness} czy \textit{Eccentricity}, mogą mieć znaczenie przy rozróżnianiu odmian bardziej okrągłych od bardziej wydłużonych.
 
-Zaletą metody LDA jest jej prostota, interpretowalność oraz stosunkowo niewielka złożoność obliczeniowa. Metoda ta pozwala również analizować, które kierunki w przestrzeni cech najlepiej rozdzielają klasy. Wadą LDA są natomiast dość silne założenia dotyczące rozkładów danych, w szczególności założenie o normalności zmiennych w klasach oraz o wspólnej macierzy kowariancji.
+% Zaletą metody LDA jest jej prostota, interpretowalność oraz stosunkowo niewielka złożoność obliczeniowa. Metoda ta pozwala również analizować, które kierunki w przestrzeni cech najlepiej rozdzielają klasy. Wadą LDA są natomiast dość silne założenia dotyczące rozkładów danych, w szczególności założenie o normalności zmiennych w klasach oraz o wspólnej macierzy kowariancji.
 
-W przypadku zbioru \textit{Dry Bean} założenie o wspólnej macierzy kowariancji może być ograniczeniem, ponieważ różne odmiany fasoli mogą charakteryzować się innym rozproszeniem cech. Na przykład jedna odmiana może być bardzo jednorodna pod względem kształtu i rozmiaru, podczas gdy inna może wykazywać większą zmienność morfologiczną. Mimo to LDA stanowi użyteczną metodę porównawczą, szczególnie ze względu na swoją klasyczną interpretację statystyczną i prostą postać granic decyzyjnych.
+% W przypadku zbioru \textit{Dry Bean} założenie o wspólnej macierzy kowariancji może być ograniczeniem, ponieważ różne odmiany fasoli mogą charakteryzować się innym rozproszeniem cech. Na przykład jedna odmiana może być bardzo jednorodna pod względem kształtu i rozmiaru, podczas gdy inna może wykazywać większą zmienność morfologiczną. Mimo to LDA stanowi użyteczną metodę porównawczą, szczególnie ze względu na swoją klasyczną interpretację statystyczną i prostą postać granic decyzyjnych.
 
 
-\section{QDA - Quadratic Discriminant Analysis}
 
-Kwadratowa analiza dyskryminacyjna, czyli QDA, jest metodą klasyfikacji statystycznej blisko związaną z liniową analizą dyskryminacyjną. Podobnie jak LDA, metoda QDA zakłada, że rozkład zmiennych objaśniających w każdej klasie jest wielowymiarowym rozkładem normalnym. Różnica polega jednak na tym, że QDA nie wymaga, aby wszystkie klasy miały tę samą macierz kowariancji.
 
-Dla klasy $k$ zakłada się, że:
-\[
-X \mid Y = k \sim N(\mu_k, \Sigma_k),
-\]
-gdzie $\mu_k$ oznacza wektor średnich cech dla klasy $k$, natomiast $\Sigma_k$ oznacza macierz kowariancji charakterystyczną dla tej klasy.
+% \section{QDA - Quadratic Discriminant Analysis}
 
-W przeciwieństwie do LDA, w metodzie QDA każda klasa może mieć własną strukturę zmienności. Oznacza to, że klasy mogą różnić się nie tylko położeniem w przestrzeni cech, ale również kształtem i rozproszeniem chmur punktów. Jest to szczególnie istotne wtedy, gdy analizowane grupy nie mają podobnej wariancji lub gdy granice między nimi nie są liniowe.
+% Kwadratowa analiza dyskryminacyjna, czyli QDA, jest metodą klasyfikacji statystycznej blisko związaną z liniową analizą dyskryminacyjną. Podobnie jak LDA, metoda QDA zakłada, że rozkład zmiennych objaśniających w każdej klasie jest wielowymiarowym rozkładem normalnym. Różnica polega jednak na tym, że QDA nie wymaga, aby wszystkie klasy miały tę samą macierz kowariancji.
 
-Funkcja dyskryminacyjna dla klasy $k$ w metodzie QDA ma postać:
-\[
-\delta_k(x)
-=
--\frac{1}{2}\log |\Sigma_k|
--
-\frac{1}{2}(x-\mu_k)^T \Sigma_k^{-1}(x-\mu_k)
-+
-\log \pi_k,
-\]
-gdzie $\pi_k$ oznacza prawdopodobieństwo a priori przynależności obserwacji do klasy $k$.
+% Dla klasy $k$ zakłada się, że:
+% \[
+% X \mid Y = k \sim N(\mu_k, \Sigma_k),
+% \]
+% gdzie $\mu_k$ oznacza wektor średnich cech dla klasy $k$, natomiast $\Sigma_k$ oznacza macierz kowariancji charakterystyczną dla tej klasy.
 
-Nowa obserwacja $x$ jest klasyfikowana do tej klasy, dla której funkcja dyskryminacyjna osiąga największą wartość:
-\[
-\hat{Y} = \arg\max_k \delta_k(x).
-\]
+% W przeciwieństwie do LDA, w metodzie QDA każda klasa może mieć własną strukturę zmienności. Oznacza to, że klasy mogą różnić się nie tylko położeniem w przestrzeni cech, ale również kształtem i rozproszeniem chmur punktów. Jest to szczególnie istotne wtedy, gdy analizowane grupy nie mają podobnej wariancji lub gdy granice między nimi nie są liniowe.
 
-Ze względu na obecność składnika kwadratowego
-\[
-(x-\mu_k)^T \Sigma_k^{-1}(x-\mu_k),
-\]
-granice decyzyjne w metodzie QDA są na ogół krzywoliniowe. Oznacza to, że QDA jest metodą bardziej elastyczną niż LDA i może lepiej dopasować się do sytuacji, w której klasy są rozdzielone w sposób nieliniowy.
+% Funkcja dyskryminacyjna dla klasy $k$ w metodzie QDA ma postać:
+% \[
+% \delta_k(x)
+% =
+% -\frac{1}{2}\log |\Sigma_k|
+% -
+% \frac{1}{2}(x-\mu_k)^T \Sigma_k^{-1}(x-\mu_k)
+% +
+% \log \pi_k,
+% \]
+% gdzie $\pi_k$ oznacza prawdopodobieństwo a priori przynależności obserwacji do klasy $k$.
 
-W kontekście zbioru \textit{Dry Bean} metoda QDA może być przydatna, ponieważ różne odmiany fasoli mogą mieć odmienne rozkłady cech. Przykładowo, odmiana \textit{BOMBAY} może być stosunkowo łatwa do odróżnienia ze względu na większy rozmiar ziaren, natomiast odmiany takie jak \textit{DERMASON} i \textit{SIRA} mogą być do siebie bardziej podobne i częściowo nakładać się w przestrzeni cech. W takiej sytuacji możliwość tworzenia nieliniowych granic decyzyjnych może poprawić jakość klasyfikacji.
+% Nowa obserwacja $x$ jest klasyfikowana do tej klasy, dla której funkcja dyskryminacyjna osiąga największą wartość:
+% \[
+% \hat{Y} = \arg\max_k \delta_k(x).
+% \]
 
-Zaletą QDA jest większa elastyczność w porównaniu z LDA. Metoda ta może lepiej radzić sobie w przypadku klas o różnym rozproszeniu i różnych kształtach rozkładów. Wadą jest natomiast większa liczba estymowanych parametrów, ponieważ dla każdej klasy osobno estymowana jest macierz kowariancji. Może to prowadzić do mniej stabilnych wyników, szczególnie wtedy, gdy liczba obserwacji w niektórych klasach jest niewielka lub gdy zmienne objaśniające są silnie skorelowane.
+% Ze względu na obecność składnika kwadratowego
+% \[
+% (x-\mu_k)^T \Sigma_k^{-1}(x-\mu_k),
+% \]
+% granice decyzyjne w metodzie QDA są na ogół krzywoliniowe. Oznacza to, że QDA jest metodą bardziej elastyczną niż LDA i może lepiej dopasować się do sytuacji, w której klasy są rozdzielone w sposób nieliniowy.
 
-W zbiorze \textit{Dry Bean} wiele cech opisujących ziarna jest ze sobą naturalnie powiązanych. Przykładowo, większe ziarna mają zwykle większe wartości zmiennych takich jak \textit{Area}, \textit{Perimeter}, \textit{MajorAxisLength} czy \textit{ConvexArea}. Silna współzależność zmiennych może wpływać na stabilność estymacji macierzy kowariancji w metodzie QDA.
+% W kontekście zbioru \textit{Dry Bean} metoda QDA może być przydatna, ponieważ różne odmiany fasoli mogą mieć odmienne rozkłady cech. Przykładowo, odmiana \textit{BOMBAY} może być stosunkowo łatwa do odróżnienia ze względu na większy rozmiar ziaren, natomiast odmiany takie jak \textit{DERMASON} i \textit{SIRA} mogą być do siebie bardziej podobne i częściowo nakładać się w przestrzeni cech. W takiej sytuacji możliwość tworzenia nieliniowych granic decyzyjnych może poprawić jakość klasyfikacji.
 
-Podsumowując, QDA można traktować jako bardziej elastyczne rozszerzenie LDA. LDA zakłada wspólną macierz kowariancji dla wszystkich klas i prowadzi do liniowych granic decyzyjnych, natomiast QDA dopuszcza osobne macierze kowariancji dla każdej klasy i umożliwia tworzenie granic krzywoliniowych. W przeprowadzonej analizie obie metody zostały wykorzystane w celu porównania skuteczności klasycznych metod dyskryminacyjnych w problemie klasyfikacji odmian fasoli.
+% Zaletą QDA jest większa elastyczność w porównaniu z LDA. Metoda ta może lepiej radzić sobie w przypadku klas o różnym rozproszeniu i różnych kształtach rozkładów. Wadą jest natomiast większa liczba estymowanych parametrów, ponieważ dla każdej klasy osobno estymowana jest macierz kowariancji. Może to prowadzić do mniej stabilnych wyników, szczególnie wtedy, gdy liczba obserwacji w niektórych klasach jest niewielka lub gdy zmienne objaśniające są silnie skorelowane.
+
+% W zbiorze \textit{Dry Bean} wiele cech opisujących ziarna jest ze sobą naturalnie powiązanych. Przykładowo, większe ziarna mają zwykle większe wartości zmiennych takich jak \textit{Area}, \textit{Perimeter}, \textit{MajorAxisLength} czy \textit{ConvexArea}. Silna współzależność zmiennych może wpływać na stabilność estymacji macierzy kowariancji w metodzie QDA.
+
+% Podsumowując, QDA można traktować jako bardziej elastyczne rozszerzenie LDA. LDA zakłada wspólną macierz kowariancji dla wszystkich klas i prowadzi do liniowych granic decyzyjnych, natomiast QDA dopuszcza osobne macierze kowariancji dla każdej klasy i umożliwia tworzenie granic krzywoliniowych. W przeprowadzonej analizie obie metody zostały wykorzystane w celu porównania skuteczności klasycznych metod dyskryminacyjnych w problemie klasyfikacji odmian fasoli.
 
 
 
@@ -428,105 +452,124 @@ Podsumowując, QDA można traktować jako bardziej elastyczne rozszerzenie LDA. 
 
 % ---------------------------------------------------------------
 
-\section{Naive Bayes}
+% \section{Naive Bayes}
 
-%Zakłada, że cechy są niezależne, a w wybranym zbiorze takie nie są.
+% %Zakłada, że cechy są niezależne, a w wybranym zbiorze takie nie są.
 
-Naiwny klasyfikator Bayesa jest probabilistyczną metodą klasyfikacji opartą na twierdzeniu Bayesa. Celem metody jest wyznaczenie prawdopodobieństwa przynależności obserwacji do każdej z klas na podstawie wartości zmiennych objaśniających, a następnie przypisanie obserwacji do klasy o największym prawdopodobieństwie a posteriori.
+% Naiwny klasyfikator Bayesa jest probabilistyczną metodą klasyfikacji opartą na twierdzeniu Bayesa. Celem metody jest wyznaczenie prawdopodobieństwa przynależności obserwacji do każdej z klas na podstawie wartości zmiennych objaśniających, a następnie przypisanie obserwacji do klasy o największym prawdopodobieństwie a posteriori.
 
-Zgodnie z twierdzeniem Bayesa prawdopodobieństwo przynależności obserwacji o wektorze cech $X$ do klasy $k$ można zapisać jako:
-\[
-P(Y = k \mid X)
-=
-\frac{P(X \mid Y = k)P(Y = k)}{P(X)}.
-\]
+% Zgodnie z twierdzeniem Bayesa prawdopodobieństwo przynależności obserwacji o wektorze cech $X$ do klasy $k$ można zapisać jako:
+% \[
+% P(Y = k \mid X)
+% =
+% \frac{P(X \mid Y = k)P(Y = k)}{P(X)}.
+% \]
 
-W powyższym wzorze $P(Y = k \mid X)$ oznacza prawdopodobieństwo a posteriori przynależności obserwacji do klasy $k$, $P(X \mid Y = k)$ oznacza prawdopodobieństwo zaobserwowania danego zestawu cech w klasie $k$, natomiast $P(Y = k)$ jest prawdopodobieństwem a priori wystąpienia klasy $k$.
+% W powyższym wzorze $P(Y = k \mid X)$ oznacza prawdopodobieństwo a posteriori przynależności obserwacji do klasy $k$, $P(X \mid Y = k)$ oznacza prawdopodobieństwo zaobserwowania danego zestawu cech w klasie $k$, natomiast $P(Y = k)$ jest prawdopodobieństwem a priori wystąpienia klasy $k$.
 
-Ponieważ mianownik $P(X)$ jest taki sam dla wszystkich klas, przy klasyfikacji można porównywać jedynie wartości licznika:
-\[
-P(Y = k \mid X) \propto P(X \mid Y = k)P(Y = k).
-\]
+% Ponieważ mianownik $P(X)$ jest taki sam dla wszystkich klas, przy klasyfikacji można porównywać jedynie wartości licznika:
+% \[
+% P(Y = k \mid X) \propto P(X \mid Y = k)P(Y = k).
+% \]
 
-Nowa obserwacja zostaje przypisana do tej klasy, dla której powyższe wyrażenie przyjmuje największą wartość:
-\[
-\hat{Y}
-=
-\arg\max_k P(X \mid Y = k)P(Y = k).
-\]
+% Nowa obserwacja zostaje przypisana do tej klasy, dla której powyższe wyrażenie przyjmuje największą wartość:
+% \[
+% \hat{Y}
+% =
+% \arg\max_k P(X \mid Y = k)P(Y = k).
+% \]
 
-Nazwa metody wynika z jej podstawowego założenia, nazywanego założeniem naiwnym. Zakłada się mianowicie, że zmienne objaśniające są warunkowo niezależne przy znanej klasie. Oznacza to, że po ustaleniu klasy $Y = k$ każda cecha $X_j$ jest traktowana jako niezależna od pozostałych cech. Wtedy prawdopodobieństwo $P(X \mid Y = k)$ można zapisać jako iloczyn prawdopodobieństw dla poszczególnych zmiennych:
-\[
-P(X \mid Y = k)
-=
-P(X_1, X_2, \ldots, X_p \mid Y = k)
-\approx
-\prod_{j=1}^{p} P(X_j \mid Y = k).
-\]
+% Nazwa metody wynika z jej podstawowego założenia, nazywanego założeniem naiwnym. Zakłada się mianowicie, że zmienne objaśniające są warunkowo niezależne przy znanej klasie. Oznacza to, że po ustaleniu klasy $Y = k$ każda cecha $X_j$ jest traktowana jako niezależna od pozostałych cech. Wtedy prawdopodobieństwo $P(X \mid Y = k)$ można zapisać jako iloczyn prawdopodobieństw dla poszczególnych zmiennych:
+% \[
+% P(X \mid Y = k)
+% =
+% P(X_1, X_2, \ldots, X_p \mid Y = k)
+% \approx
+% \prod_{j=1}^{p} P(X_j \mid Y = k).
+% \]
 
-W konsekwencji reguła klasyfikacyjna przyjmuje postać:
-\[
-\hat{Y}
-=
-\arg\max_k
-P(Y = k)
-\prod_{j=1}^{p} P(X_j \mid Y = k).
-\]
+% W konsekwencji reguła klasyfikacyjna przyjmuje postać:
+% \[
+% \hat{Y}
+% =
+% \arg\max_k
+% P(Y = k)
+% \prod_{j=1}^{p} P(X_j \mid Y = k).
+% \]
 
-W analizowanym zbiorze \textit{Dry Bean Dataset} zmienne objaśniające mają charakter ilościowy, ponieważ opisują geometryczne i morfologiczne cechy ziaren fasoli. Z tego względu w praktyce stosuje się najczęściej gaussowską wersję naiwnego klasyfikatora Bayesa. Zakłada ona, że rozkład każdej zmiennej objaśniającej w obrębie danej klasy jest rozkładem normalnym:
-\[
-X_j \mid Y = k \sim N(\mu_{jk}, \sigma_{jk}^2),
-\]
-gdzie $\mu_{jk}$ oznacza średnią wartość cechy $X_j$ w klasie $k$, natomiast $\sigma_{jk}^2$ oznacza wariancję tej cechy w klasie $k$.
+% W analizowanym zbiorze \textit{Dry Bean Dataset} zmienne objaśniające mają charakter ilościowy, ponieważ opisują geometryczne i morfologiczne cechy ziaren fasoli. Z tego względu w praktyce stosuje się najczęściej gaussowską wersję naiwnego klasyfikatora Bayesa. Zakłada ona, że rozkład każdej zmiennej objaśniającej w obrębie danej klasy jest rozkładem normalnym:
+% \[
+% X_j \mid Y = k \sim N(\mu_{jk}, \sigma_{jk}^2),
+% \]
+% gdzie $\mu_{jk}$ oznacza średnią wartość cechy $X_j$ w klasie $k$, natomiast $\sigma_{jk}^2$ oznacza wariancję tej cechy w klasie $k$.
 
-Dla każdej klasy oraz każdej cechy estymowane są więc osobne parametry rozkładu normalnego. Następnie dla nowej obserwacji model oblicza, jak prawdopodobne są zaobserwowane wartości cech przy założeniu, że obserwacja pochodzi z danej klasy. Na tej podstawie wyznaczane jest prawdopodobieństwo przynależności do każdej odmiany fasoli.
+% Dla każdej klasy oraz każdej cechy estymowane są więc osobne parametry rozkładu normalnego. Następnie dla nowej obserwacji model oblicza, jak prawdopodobne są zaobserwowane wartości cech przy założeniu, że obserwacja pochodzi z danej klasy. Na tej podstawie wyznaczane jest prawdopodobieństwo przynależności do każdej odmiany fasoli.
 
-W kontekście klasyfikacji ziaren fasoli metoda Naive Bayes sprawdza więc, dla której odmiany najbardziej prawdopodobne są obserwowane wartości takich cech jak \textit{Area}, \textit{Perimeter}, \textit{MajorAxisLength}, \textit{MinorAxisLength}, \textit{Roundness}, \textit{Compactness} czy \textit{Eccentricity}. Przykładowo, jeżeli dane ziarno ma duże wartości cech związanych z rozmiarem, model może przypisać mu większe prawdopodobieństwo przynależności do odmiany charakteryzującej się większymi ziarnami.
+% W kontekście klasyfikacji ziaren fasoli metoda Naive Bayes sprawdza więc, dla której odmiany najbardziej prawdopodobne są obserwowane wartości takich cech jak \textit{Area}, \textit{Perimeter}, \textit{MajorAxisLength}, \textit{MinorAxisLength}, \textit{Roundness}, \textit{Compactness} czy \textit{Eccentricity}. Przykładowo, jeżeli dane ziarno ma duże wartości cech związanych z rozmiarem, model może przypisać mu większe prawdopodobieństwo przynależności do odmiany charakteryzującej się większymi ziarnami.
 
-Zaletą naiwnego klasyfikatora Bayesa jest prostota, niewielka złożoność obliczeniowa oraz możliwość uzyskania probabilistycznej interpretacji wyników. Metoda ta może być stosowana jako punkt odniesienia dla bardziej złożonych klasyfikatorów, ponieważ jest szybka i łatwa do implementacji.
+% Zaletą naiwnego klasyfikatora Bayesa jest prostota, niewielka złożoność obliczeniowa oraz możliwość uzyskania probabilistycznej interpretacji wyników. Metoda ta może być stosowana jako punkt odniesienia dla bardziej złożonych klasyfikatorów, ponieważ jest szybka i łatwa do implementacji.
 
-Głównym ograniczeniem metody jest założenie warunkowej niezależności cech. W przypadku zbioru \textit{Dry Bean} założenie to jest dość silne, ponieważ wiele zmiennych opisujących ziarna jest ze sobą naturalnie powiązanych. Przykładowo, większe ziarna mają zwykle jednocześnie większe wartości zmiennych takich jak \textit{Area}, \textit{Perimeter}, \textit{MajorAxisLength} czy \textit{ConvexArea}. Podobnie cechy opisujące kształt, takie jak \textit{Roundness}, \textit{Compactness} i \textit{Eccentricity}, również mogą być ze sobą skorelowane.
+% Głównym ograniczeniem metody jest założenie warunkowej niezależności cech. W przypadku zbioru \textit{Dry Bean} założenie to jest dość silne, ponieważ wiele zmiennych opisujących ziarna jest ze sobą naturalnie powiązanych. Przykładowo, większe ziarna mają zwykle jednocześnie większe wartości zmiennych takich jak \textit{Area}, \textit{Perimeter}, \textit{MajorAxisLength} czy \textit{ConvexArea}. Podobnie cechy opisujące kształt, takie jak \textit{Roundness}, \textit{Compactness} i \textit{Eccentricity}, również mogą być ze sobą skorelowane.
 
-Z tego powodu naiwny klasyfikator Bayesa może nie wykorzystywać w pełni zależności występujących między zmiennymi. Mimo to metoda została uwzględniona w analizie jako klasyczny probabilistyczny klasyfikator, którego wyniki można porównać z metodami bardziej elastycznymi, takimi jak QDA, Random Forest czy SVM.
+% Z tego powodu naiwny klasyfikator Bayesa może nie wykorzystywać w pełni zależności występujących między zmiennymi. Mimo to metoda została uwzględniona w analizie jako klasyczny probabilistyczny klasyfikator, którego wyniki można porównać z metodami bardziej elastycznymi, takimi jak QDA, Random Forest czy SVM.
+
+
+
 
 \section{Random Forest}
 
-Lasy losowe (ang. \textit{Random Forest}) to zaawansowany algorytm uczenia maszynowego należący do rodziny metod zespołowych (ang. \textit{ensemble methods}). Podstawą tej metody jest konstruowanie wielu niezależnych drzew decyzyjnych w fazie trenowania modelu. Ostateczna decyzja klasyfikacyjna podejmowana jest poprzez agregację wyników wszystkich pojedynczych drzew za pomocą głosowania większościowego – obserwacja jest przypisywana do klasy, którą wskazała najliczniejsza grupa drzew decyzyjnych.
+% TODO
 
-Siła tej metody i her odporność na zjawisko przeuczenia (ang. \textit{overfitting}) wynikają z podwójnego zastosowania losowości. Po pierwsze, każde z drzew jest uczone na nieco innym podzbiorze danych treningowych, pobieranym ze zwracaniem w ramach procedury tzw. agregacji bootstrapowej (ang. \textit{bagging}). Po drugie, w każdym węźle drzewa, podczas wyboru optymalnego kryterium podziału, algorytm rozważa jedynie losowo wybrany podzbiór wszystkich dostępnych zmiennych objaśniających (zazwyczaj o rozmiarze $\sqrt{p}$, gdzie $p$ to całkowita liczba cech).
+% Lasy losowe (ang. \textit{Random Forest}) to zaawansowany algorytm uczenia maszynowego należący do rodziny metod zespołowych (ang. \textit{ensemble methods}). Podstawą tej metody jest konstruowanie wielu niezależnych drzew decyzyjnych w fazie trenowania modelu. Ostateczna decyzja klasyfikacyjna podejmowana jest poprzez agregację wyników wszystkich pojedynczych drzew za pomocą głosowania większościowego – obserwacja jest przypisywana do klasy, którą wskazała najliczniejsza grupa drzew decyzyjnych.
 
-Podział węzła $m$ w pojedynczym drzewie dokonywany jest poprzez wyznaczenie takiego parametru i punktu podziału, który maksymalizuje spadek nieczystości (ang. \textit{impurity}). Nieczystość węzła dla klasyfikacji wieloklasowej najczęściej opisuje się za pomocą indeksu Giniego $G(m)$ lub entropii $H(m)$, zdefiniowanych jako:
-\begin{equation}
-G(m) = \sum_{k=1}^{K} \hat{p}_{mk} (1 - \hat{p}_{mk})
-\end{equation}
-\begin{equation}
-H(m) = - \sum_{k=1}^{K} \hat{p}_{mk} \log_2 \hat{p}_{mk}
-\end{equation}
-gdzie $\hat{p}_{mk}$ oznacza proporcję obserwacji klasy $k$ ($k = 1, \dots, K$) w węźle $m$.
+% Siła tej metody i her odporność na zjawisko przeuczenia (ang. \textit{overfitting}) wynikają z podwójnego zastosowania losowości. Po pierwsze, każde z drzew jest uczone na nieco innym podzbiorze danych treningowych, pobieranym ze zwracaniem w ramach procedury tzw. agregacji bootstrapowej (ang. \textit{bagging}). Po drugie, w każdym węźle drzewa, podczas wyboru optymalnego kryterium podziału, algorytm rozważa jedynie losowo wybrany podzbiór wszystkich dostępnych zmiennych objaśniających (zazwyczaj o rozmiarze $\sqrt{p}$, gdzie $p$ to całkowita liczba cech).
 
-W analizie zbioru \textit{Dry Bean}, gdzie zmienne objaśniające (jak \textit{Area}, \textit{Perimeter} czy \textit{ConvexArea}) charakteryzują się bardzo silną korelacją liniową, metoda lasów losowych wykazuje dużą przewagę. Losowy dobór zmiennych w węzłach zapobiega zdominowaniu struktury wszystkich drzew przez jedną, najsilniej różnicującą cechę rozmiaru. Wymusza to na pojedynczych klasyfikatorach poszukiwanie reguł decyzyjnych także w subtelniejszych parametrach kształtu (takich jak \textit{ShapeFactor1} czy \textit{Solidity}), co znacząco poprawia elastyczność i moc uogólniania całego modelu.
+% Podział węzła $m$ w pojedynczym drzewie dokonywany jest poprzez wyznaczenie takiego parametru i punktu podziału, który maksymalizuje spadek nieczystości (ang. \textit{impurity}). Nieczystość węzła dla klasyfikacji wieloklasowej najczęściej opisuje się za pomocą indeksu Giniego $G(m)$ lub entropii $H(m)$, zdefiniowanych jako:
+% \begin{equation}
+% G(m) = \sum_{k=1}^{K} \hat{p}_{mk} (1 - \hat{p}_{mk})
+% \end{equation}
+% \begin{equation}
+% H(m) = - \sum_{k=1}^{K} \hat{p}_{mk} \log_2 \hat{p}_{mk}
+% \end{equation}
+% gdzie $\hat{p}_{mk}$ oznacza proporcję obserwacji klasy $k$ ($k = 1, \dots, K$) w węźle $m$.
 
-\section{SVM - metoda wektorów nośnych}
+% W analizie zbioru \textit{Dry Bean}, gdzie zmienne objaśniające (jak \textit{Area}, \textit{Perimeter} czy \textit{ConvexArea}) charakteryzują się bardzo silną korelacją liniową, metoda lasów losowych wykazuje dużą przewagę. Losowy dobór zmiennych w węzłach zapobiega zdominowaniu struktury wszystkich drzew przez jedną, najsilniej różnicującą cechę rozmiaru. Wymusza to na pojedynczych klasyfikatorach poszukiwanie reguł decyzyjnych także w subtelniejszych parametrach kształtu (takich jak \textit{ShapeFactor1} czy \textit{Solidity}), co znacząco poprawia elastyczność i moc uogólniania całego modelu.
 
-Maszyna wektorów nośnych (ang. \textit{Support Vector Machine}, SVM) to algorytm, którego głównym celem jest znalezienie w wielowymiarowej przestrzeni cech takiej hiperpowierzchni decyzyjnej, która możliwie najlepiej rozdziela obserwacje należące do różnych klas. Optymalna granica definiowana jest jako ta, która maksymalizuje tzw. margines, czyli minimalną odległość pomiędzy wyznaczoną hiperpowierzchnią a najbliższymi jej punktami treningowymi z każdej klasy. Punkty leżące dokładnie na krawędziach tego marginesu określane są mianem wektorów nośnych i to wyłącznie one determinują położenie granicy. 
 
-W ogólnym przypadku, gdy dane nie są idealnie separowalne liniowo, wprowadza się tzw. zmienne dopełniające $\xi_i \ge 0$ (ang. \textit{slack variables}), dopuszczające pewne błędy klasyfikacji na zbiorze treningowym. Konstrukcja optymalnego klasyfikatora sprowadza się wówczas do rozwiązania zadania optymalizacyjnego z tzw. miękkim marginesem (ang. \textit{soft margin}):
-\begin{equation}
-\min_{w, b, \xi} \left( \frac{1}{2} \|w\|^2 + C \sum_{i=1}^{N} \xi_i \right)
-\end{equation}
-przy zachowaniu warunków ograniczających:
-\begin{equation}
-y_i (w^T x_i + b) \ge 1 - \xi_i, \quad \xi_i \ge 0, \quad i = 1, \dots, N
-\end{equation}
-gdzie $w$ to wektor wag hiperpłaszczyzny, $b$ to wyraz wolny, $y_i \in \{-1, 1\}$ oznacza etykietę klasy, a parametr $C > 0$ kontroluje kompromis pomiędzy szerokością marginesu a karą za błędy treningowe.
 
-Głównym atutem metody SVM w złożonych zadaniach klasyfikacyjnych jest możliwość zastosowania tzw. sztuczki jądrowej (ang. \textit{kernel trick}). Technika ta pozwala na niejawne zrzutowanie oryginalnych zmiennych objaśniających do przestrzeni o wyższym wymiarze za pomocą funkcji jądra $K(x_i, x_j) = \langle \Phi(x_i), \Phi(x_j) \rangle$. W niniejszym projekcie wykorzystano radialną funkcję bazową (jądro RBF / gaussowskie), zdefiniowaną jako:
-\begin{equation}
-K(x_i, x_j) = \exp\left( -\gamma \|x_i - x_j\|^2 \right)
-\end{equation}
-gdzie $\gamma > 0$ jest parametrem określającym promień wpływu pojedynczej obserwacji wspierającej.
 
-Dla ziaren fasoli, odmiany takie jak \textit{DERMASON} i \textit{SIRA} bywają silnie zbliżone wizualnie, co objawia się gęstym nakładaniem się chmur ich punktów w szesnastowymiarowej przestrzeni cech. Elastyczność maszyny wektorów nośnych z nieliniowym jądrem RBF pozwala na zdefiniowanie płynnych, zakrzywionych granic obszarów decyzyjnych, co pozwala skutecznie omijać ograniczenia klasycznej liniowej analizy dyskryminacyjnej.
+% \section{SVM - metoda wektorów nośnych}
+
+% Maszyna wektorów nośnych (ang. \textit{Support Vector Machine}, SVM) to algorytm, którego głównym celem jest znalezienie w wielowymiarowej przestrzeni cech takiej hiperpowierzchni decyzyjnej, która możliwie najlepiej rozdziela obserwacje należące do różnych klas. Optymalna granica definiowana jest jako ta, która maksymalizuje tzw. margines, czyli minimalną odległość pomiędzy wyznaczoną hiperpowierzchnią a najbliższymi jej punktami treningowymi z każdej klasy. Punkty leżące dokładnie na krawędziach tego marginesu określane są mianem wektorów nośnych i to wyłącznie one determinują położenie granicy. 
+
+% W ogólnym przypadku, gdy dane nie są idealnie separowalne liniowo, wprowadza się tzw. zmienne dopełniające $\xi_i \ge 0$ (ang. \textit{slack variables}), dopuszczające pewne błędy klasyfikacji na zbiorze treningowym. Konstrukcja optymalnego klasyfikatora sprowadza się wówczas do rozwiązania zadania optymalizacyjnego z tzw. miękkim marginesem (ang. \textit{soft margin}):
+% \begin{equation}
+% \min_{w, b, \xi} \left( \frac{1}{2} \|w\|^2 + C \sum_{i=1}^{N} \xi_i \right)
+% \end{equation}
+% przy zachowaniu warunków ograniczających:
+% \begin{equation}
+% y_i (w^T x_i + b) \ge 1 - \xi_i, \quad \xi_i \ge 0, \quad i = 1, \dots, N
+% \end{equation}
+% gdzie $w$ to wektor wag hiperpłaszczyzny, $b$ to wyraz wolny, $y_i \in \{-1, 1\}$ oznacza etykietę klasy, a parametr $C > 0$ kontroluje kompromis pomiędzy szerokością marginesu a karą za błędy treningowe.
+
+% Głównym atutem metody SVM w złożonych zadaniach klasyfikacyjnych jest możliwość zastosowania tzw. sztuczki jądrowej (ang. \textit{kernel trick}). Technika ta pozwala na niejawne zrzutowanie oryginalnych zmiennych objaśniających do przestrzeni o wyższym wymiarze za pomocą funkcji jądra $K(x_i, x_j) = \langle \Phi(x_i), \Phi(x_j) \rangle$. W niniejszym projekcie wykorzystano radialną funkcję bazową (jądro RBF / gaussowskie), zdefiniowaną jako:
+% \begin{equation}
+% K(x_i, x_j) = \exp\left( -\gamma \|x_i - x_j\|^2 \right)
+% \end{equation}
+% gdzie $\gamma > 0$ jest parametrem określającym promień wpływu pojedynczej obserwacji wspierającej.
+
+% Dla ziaren fasoli, odmiany takie jak \textit{DERMASON} i \textit{SIRA} bywają silnie zbliżone wizualnie, co objawia się gęstym nakładaniem się chmur ich punktów w szesnastowymiarowej przestrzeni cech. Elastyczność maszyny wektorów nośnych z nieliniowym jądrem RBF pozwala na zdefiniowanie płynnych, zakrzywionych granic obszarów decyzyjnych, co pozwala skutecznie omijać ograniczenia klasycznej liniowej analizy dyskryminacyjnej.
+
+
+\section{Sieć neuronowa}
+
+% TODO
+
+\section{Metoda hybrydowa}
+
+% TODO
+
+
 
 \section{Przegląd literatury dotyczącej metod}
 
@@ -543,15 +586,21 @@ Użyte jako punkt odniesienia klasyczne metody, takie jak wielomianowa regresja 
 
 \chapter{Wyniki}
 
-\input{wyniki_regresja_logistyczna.tex}
-
 \section{Mierniki}
 
 % (np. AUC, Accuracy, F1 Score) – minimum jeden
 
+% tutaj dudzin mówił że trzeba dokładnie opisać jak mają się te wszystkie accuracy do tego że to jest wieloklasowe.
+
+% jak to ktoś już zrobi to trzeba potem sprawdzić czy wyniki wszystkich tych metod mają je wszystkie i czy dobrze je interpretują
+
 \section{Sposób walidacji}
 
 % (np. krzyżowa, leave-one-out, wielokrotne próbkowanie) – minimum jeden sposó
+
+\section{Wielomianowa regresja logistyczna}
+
+\input{wyniki_regresja_logistyczna.tex}
 
 
 % ----------------------------------------------------
@@ -572,8 +621,22 @@ Użyte jako punkt odniesienia klasyczne metody, takie jak wielomianowa regresja 
 
 \begin{thebibliography}{9}
 
-\bibitem{xxxx}
-xx, x. (xxx).
+% TODO
+
+\bibitem{koklu2020}
+Koklu, x. (xxx).
+\textit{xxx}.
+xxx.
+\url{xxxx}
+
+\bibitem{cortes1995}
+Cortes, x. (xxx).
+\textit{xxx}.
+xxx.
+\url{xxxx}
+
+\bibitem{breiman2001}
+Breiman, x. (xxx).
 \textit{xxx}.
 xxx.
 \url{xxxx}
