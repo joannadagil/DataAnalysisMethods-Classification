@@ -300,3 +300,326 @@ writeLines(
   latex_output_clean,
   file.path(report_dir, "tabele_statystyki_opisowe_clean.tex")
 )
+
+
+
+
+
+# --------------------------------------------------------------
+# PODZIAL I SKALOWANIE CECH PONOWNE, TRZEBA POPRAWIĆ TEN POWYZEJ ALBO TEN PONIŻEJ
+
+library(nnet)
+
+class_column <- "Class"
+bean_data[[class_column]] <- as.factor(bean_data[[class_column]])
+
+# Sprawdzenie rozkładu klas
+print(table(bean_data[[class_column]]))
+
+## PODZIAŁ NA ZBÓR UCZĄCY I TESTOWY z zachowaniem proporcji klas
+set.seed(42)
+
+train_indices <- unlist(
+  tapply(
+    seq_len(nrow(bean_data)),
+    bean_data[[class_column]],
+    function(indices) {
+      sample(indices, size = floor(0.7 * length(indices)))
+    }
+  )
+)
+
+train_data <- bean_data[train_indices, ]
+test_data  <- bean_data[-train_indices, ]
+
+cat("Liczba obserwacji w zbiorze uczącym:", nrow(train_data), "\n")
+cat("Liczba obserwacji w zbiorze testowym:", nrow(test_data), "\n\n")
+
+
+
+# wykresy proporcji klas
+
+if (!requireNamespace("ggplot2", quietly = TRUE)) {
+  stop("Brakuje pakietu ggplot2. Zainstaluj go komendą: install.packages('ggplot2')")
+}
+
+library(ggplot2)
+
+class_levels <- levels(bean_data[[class_column]])
+
+get_class_proportions <- function(data, set_name) {
+  counts <- table(factor(data[[class_column]], levels = class_levels))
+
+  data.frame(
+    Zbior = set_name,
+    Class = factor(names(counts), levels = class_levels),
+    Liczebnosc = as.integer(counts),
+    Proportion = as.numeric(counts) / sum(counts)
+  )
+}
+
+class_proportions <- rbind(
+  get_class_proportions(bean_data, "Cały zbiór"),
+  get_class_proportions(train_data, "Zbiór uczący"),
+  get_class_proportions(test_data, "Zbiór testowy")
+)
+
+class_proportions$Procent <- paste0(
+  round(100 * class_proportions$Proportion, 1),
+  "%"
+)
+
+# Jeden wspólny wykres PDF z trzema panelami
+plot_class_proportions <- ggplot(
+  class_proportions,
+  aes(x = Class, y = Proportion)
+) +
+  geom_col() +
+  geom_text(
+    aes(label = Procent),
+    vjust = -0.3,
+    size = 3
+  ) +
+  facet_wrap(~ Zbior, ncol = 1) +
+  scale_y_continuous(
+    labels = function(x) paste0(round(100 * x), "%"),
+    limits = c(0, max(class_proportions$Proportion) * 1.15)
+  ) +
+  labs(
+    title = "",
+    x = "Klasa fasoli",
+    y = "Udział obserwacji"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
+class_proportions_pdf <- file.path(
+  report_dir,
+  "proporcje_klas_original_train_test.pdf"
+)
+
+ggsave(
+  filename = class_proportions_pdf,
+  plot = plot_class_proportions,
+  width = 10,
+  height = 9
+)
+
+cat("Zapisano wykres proporcji klas w pliku:", class_proportions_pdf, "\n")
+
+
+## SKALOWANIE ZMIENNYCH NUMERYCZNYCH oddzielnie dla zbioru uczącego i testowego, z wykorzystaniem parametrów ze zbioru uczącego
+
+predictor_columns <- setdiff(names(bean_data), class_column)
+numeric_predictors <- predictor_columns[sapply(bean_data[predictor_columns], is.numeric)]
+
+train_scaled <- train_data
+test_scaled <- test_data
+
+train_means <- sapply(train_data[numeric_predictors], mean, na.rm = TRUE)
+train_sds <- sapply(train_data[numeric_predictors], sd, na.rm = TRUE)
+
+train_scaled[numeric_predictors] <- scale(
+  train_data[numeric_predictors],
+  center = train_means,
+  scale = train_sds
+)
+
+test_scaled[numeric_predictors] <- scale(
+  test_data[numeric_predictors],
+  center = train_means,
+  scale = train_sds
+)
+
+
+# Statystyki opisowe dla zbioru uczącego (po skalowaniu) - tylko dla zmiennych numerycznych
+numeric_summary <- data.frame(
+  Zmienna = numeric_columns,
+  Srednia = sapply(train_scaled[numeric_columns], mean, na.rm = TRUE),
+  Mediana = sapply(train_scaled[numeric_columns], median, na.rm = TRUE),
+  Minimum = sapply(train_scaled[numeric_columns], min, na.rm = TRUE),
+  Maksimum = sapply(train_scaled[numeric_columns], max, na.rm = TRUE),
+  OdchylenieStandardowe = sapply(train_scaled[numeric_columns], sd, na.rm = TRUE),
+  Skosnosc = sapply(train_scaled[numeric_columns], moments::skewness, na.rm = TRUE),
+  row.names = NULL
+)
+
+numeric_summary[-1] <- lapply(numeric_summary[-1], function(x) round(x, 4))
+
+latex_tables <- list(
+  knitr::kable(
+    numeric_summary,
+    format = "latex",
+    booktabs = TRUE,
+    position = "H",
+    caption = "Statystyki opisowe zmiennych numerycznych dla zbioru uczącego (po skalowaniu)",
+    label = "statystyki-opisowe-numeryczne"
+  )
+)
+
+if (length(categorical_columns) > 0) {
+  for (column_name in categorical_columns) {
+    frequency_table <- as.data.frame(table(bean_data[[column_name]], useNA = "ifany"))
+    names(frequency_table) <- c(column_name, "liczebnosc")
+
+    latex_tables[[length(latex_tables) + 1]] <- knitr::kable(
+      frequency_table,
+      format = "latex",
+      booktabs = TRUE,
+      position = "H",
+      caption = paste("Liczebnosci dla zmiennej", column_name),
+      label = paste0("liczebnosci-", column_name)
+    )
+  }
+}
+
+latex_output <- unlist(lapply(latex_tables, function(table) c(table, "")))
+latex_output_file <- file.path(report_dir, "tabele_statystyki_opisowe_przeskalowane.tex")
+writeLines(latex_output, latex_output_file)
+
+cat("Wczytano obserwacji:", nrow(bean_data), "\n")
+cat("Wczytano zmiennych:", ncol(bean_data), "\n\n")
+cat("Zapisano tabele LaTeX w pliku:", latex_output_file, "\n")
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 3.1 WIELOMIANOWA REGRESJA LOGISTYCZNA
+
+# dopasowywanie modelu
+model_multinom <- multinom(
+  Class ~ .,
+  data = train_scaled,
+  trace = FALSE,
+  maxit = 1000,
+  MaxNWts = 10000
+)
+
+summary(model_multinom)
+
+# predykcja
+pred_multinom_class <- predict(
+  model_multinom,
+  newdata = test_scaled,
+  type = "class"
+)
+
+pred_multinom_prob <- predict(
+  model_multinom,
+  newdata = test_scaled,
+  type = "probs"
+)
+
+# ocena
+conf_matrix_multinom <- table(
+  Rzeczywista = test_scaled$Class,
+  Przewidziana = pred_multinom_class
+)
+
+print(conf_matrix_multinom)
+
+accuracy_multinom <- mean(pred_multinom_class == test_scaled$Class)
+
+cat("Accuracy dla wielomianowej regresji logistycznej:", accuracy_multinom, "\n")
+
+calculate_class_metrics <- function(conf_matrix) {
+  classes <- rownames(conf_matrix)
+
+  metrics <- data.frame(
+    Klasa = classes,
+    Precision = NA,
+    Recall = NA,
+    F1 = NA
+  )
+
+  for (class_name in classes) {
+    TP <- conf_matrix[class_name, class_name]
+    FP <- sum(conf_matrix[, class_name]) - TP
+    FN <- sum(conf_matrix[class_name, ]) - TP
+
+    precision <- ifelse(TP + FP == 0, NA, TP / (TP + FP))
+    recall <- ifelse(TP + FN == 0, NA, TP / (TP + FN))
+    f1 <- ifelse(
+      is.na(precision) | is.na(recall) | precision + recall == 0,
+      NA,
+      2 * precision * recall / (precision + recall)
+    )
+
+    metrics[metrics$Klasa == class_name, "Precision"] <- precision
+    metrics[metrics$Klasa == class_name, "Recall"] <- recall
+    metrics[metrics$Klasa == class_name, "F1"] <- f1
+  }
+
+  metrics
+}
+
+metrics_multinom <- calculate_class_metrics(conf_matrix_multinom)
+
+metrics_multinom[, c("Precision", "Recall", "F1")] <- round(
+  metrics_multinom[, c("Precision", "Recall", "F1")],
+  4
+)
+
+print(metrics_multinom)
+
+
+# latex
+predictions_multinom <- data.frame(
+  Rzeczywista = test_scaled$Class,
+  Przewidziana = pred_multinom_class,
+  pred_multinom_prob
+)
+
+
+results_multinom <- data.frame(
+  Metoda = "Wielomianowa regresja logistyczna",
+  Accuracy = round(accuracy_multinom, 4)
+)
+
+latex_multinom_tables <- list(
+  knitr::kable(
+    as.data.frame.matrix(conf_matrix_multinom),
+    format = "latex",
+    booktabs = TRUE,
+    position = "H",
+    caption = "Macierz pomyłek dla wielomianowej regresji logistycznej",
+    label = "conf-matrix-multinom"
+  ),
+  knitr::kable(
+    results_multinom,
+    format = "latex",
+    booktabs = TRUE,
+    position = "H",
+    caption = "Dokładność klasyfikacji dla wielomianowej regresji logistycznej",
+    label = "accuracy-multinom"
+  ),
+  knitr::kable(
+    metrics_multinom,
+    format = "latex",
+    booktabs = TRUE,
+    position = "H",
+    caption = "Miary jakości klasyfikacji dla wielomianowej regresji logistycznej",
+    label = "metrics-multinom"
+  )
+)
+
+latex_multinom_output <- unlist(lapply(latex_multinom_tables, function(table) c(table, "")))
+
+latex_multinom_output_file <- file.path(report_dir, "wyniki_regresja_logistyczna.tex")
+
+writeLines(latex_multinom_output, latex_multinom_output_file)
+
+cat("Zapisano wyniki regresji logistycznej w pliku:", latex_multinom_output_file, "\n")
+
+
