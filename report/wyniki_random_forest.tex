@@ -1,0 +1,79 @@
+\begin{table}[H]
+
+\caption{\label{tab:conf-matrix-rf}Macierz pomyłek dla lasu losowego (Random Forest)}
+\centering
+\begin{tabular}[t]{lrrrrrrr}
+\toprule
+  & BARBUNYA & BOMBAY & CALI & DERMASON & HOROZ & SEKER & SIRA\\
+\midrule
+BARBUNYA & 321 & 0 & 28 & 0 & 1 & 1 & 2\\
+BOMBAY & 0 & 140 & 0 & 0 & 0 & 0 & 0\\
+CALI & 17 & 0 & 433 & 0 & 1 & 0 & 1\\
+DERMASON & 0 & 0 & 0 & 909 & 0 & 16 & 53\\
+HOROZ & 0 & 0 & 7 & 0 & 478 & 0 & 1\\
+\addlinespace
+SEKER & 0 & 0 & 0 & 6 & 0 & 519 & 5\\
+SIRA & 0 & 0 & 1 & 68 & 2 & 2 & 648\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+
+\caption{\label{tab:accuracy-rf}Dokładność klasyfikacji dla lasu losowego}
+\centering
+\begin{tabular}[t]{lr}
+\toprule
+Metoda & Accuracy\\
+\midrule
+Random Forest (Las Losowy) & 0.9421\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+
+\caption{\label{tab:metrics-rf}Miary jakości klasyfikacji dla lasu losowego dla poszczególnych odmian fasoli}
+\centering
+\begin{tabular}[t]{lrrr}
+\toprule
+Klasa & Precision & Recall & F1\\
+\midrule
+BARBUNYA & 0.9497 & 0.9093 & 0.9291\\
+BOMBAY & 1.0000 & 1.0000 & 1.0000\\
+CALI & 0.9232 & 0.9580 & 0.9403\\
+DERMASON & 0.9247 & 0.9294 & 0.9271\\
+HOROZ & 0.9917 & 0.9835 & 0.9876\\
+\addlinespace
+SEKER & 0.9647 & 0.9792 & 0.9719\\
+SIRA & 0.9127 & 0.8988 & 0.9057\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+
+\caption{\label{tab:importance-rf}Istotność zmiennych w modelu Random Forest}
+\centering
+\begin{tabular}[t]{llrr}
+\toprule
+  & Zmienna & MeanDecreaseAccuracy & MeanDecreaseGini\\
+\midrule
+Area & Area & 29.4617 & 513.8312\\
+Perimeter & Perimeter & 35.8204 & 835.8412\\
+MajorAxisLength & MajorAxisLength & 26.4750 & 704.3006\\
+MinorAxisLength & MinorAxisLength & 42.2704 & 642.4694\\
+ConvexArea & ConvexArea & 32.4801 & 577.9214\\
+\addlinespace
+EquivDiameter & EquivDiameter & 30.1653 & 481.1038\\
+Eccentricity & Eccentricity & 42.3178 & 824.7030\\
+roundness & roundness & 60.5462 & 532.0119\\
+Compactness & Compactness & 52.2025 & 933.2403\\
+Solidity & Solidity & 35.6554 & 119.3277\\
+\addlinespace
+AspectRation & AspectRation & 40.7116 & 790.6448\\
+Extent & Extent & 15.6149 & 81.4359\\
+\bottomrule
+\end{tabular}
+\end{table}
+

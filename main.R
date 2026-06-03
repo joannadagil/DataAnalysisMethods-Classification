@@ -236,127 +236,55 @@ bean_clean <- bean_processed[-all_outliers, ]
 cat("\nLiczba obserwacji po czyszczeniu:", nrow(bean_clean), "\n")
 
 
-# FINALNE SKALOWANIE (PO CZYSZCZENIU)
-
-bean_scaled <- data.frame(
-  scale(bean_clean[, selected_variables])
-)
-
-bean_scaled$Class <- bean_clean$Class
-
-cat("\nDane zostały przeskalowane po usunięciu obserwacji odstających.\n")
-
-
-# STATYSTYKI DLA OCZYSZCZONYCH DANYCH
-
-numeric_columns_clean <- names(bean_scaled)[
-  sapply(bean_scaled, is.numeric)
-]
-
-categorical_columns_clean <- names(bean_scaled)[
-  !names(bean_scaled) %in% numeric_columns_clean
-]
-
-numeric_summary_clean <- data.frame(
-  Zmienna = numeric_columns_clean,
-  Srednia = sapply(bean_scaled[numeric_columns_clean], mean, na.rm = TRUE),
-  Mediana = sapply(bean_scaled[numeric_columns_clean], median, na.rm = TRUE),
-  Minimum = sapply(bean_scaled[numeric_columns_clean], min, na.rm = TRUE),
-  Maksimum = sapply(bean_scaled[numeric_columns_clean], max, na.rm = TRUE),
-  OdchylenieStandardowe = sapply(bean_scaled[numeric_columns_clean], sd, na.rm = TRUE),
-  Skosnosc = sapply(bean_scaled[numeric_columns_clean], moments::skewness, na.rm = TRUE),
-  row.names = NULL
-)
-
-numeric_summary_clean[-1] <- lapply(numeric_summary_clean[-1], round, 4)
-
-latex_tables_clean <- list(
-  knitr::kable(
-    numeric_summary_clean,
-    format = "latex",
-    booktabs = TRUE,
-    caption = "Statystyki opisowe po preprocessingu (po czyszczeniu i standaryzacji)"
-  )
-)
-
-for (column_name in categorical_columns_clean) {
-  
-  new_frequency_table <- as.data.frame(
-    table(bean_scaled[[column_name]], useNA = "ifany")
-  )
-  
-  names(new_frequency_table) <- c(column_name, "liczebnosc")
-  
-  latex_tables_clean[[length(latex_tables_clean) + 1]] <-
-    knitr::kable(
-      new_frequency_table,
-      format = "latex",
-      booktabs = TRUE,
-      caption = paste("Liczebnosci dla", column_name)
-    )
-}
-
-latex_output_clean <- unlist(lapply(latex_tables_clean, function(x) c(x, "")))
-
-writeLines(
-  latex_output_clean,
-  file.path(report_dir, "tabele_statystyki_opisowe_clean.tex")
-)
-
-
-
-
+# Usuwanie outlierów (tu kończy się stary kod przed zmianami)
+bean_clean <- bean_processed[-all_outliers, ]
+cat("\nLiczba obserwacji po czyszczeniu:", nrow(bean_clean), "\n")
 
 # --------------------------------------------------------------
-# PODZIAL I SKALOWANIE CECH PONOWNE, TRZEBA POPRAWIĆ TEN POWYZEJ ALBO TEN PONIŻEJ
+# PODZIAŁ I SKALOWANIE CECH
+# --------------------------------------------------------------
 
 library(nnet)
 
 class_column <- "Class"
-bean_data[[class_column]] <- as.factor(bean_data[[class_column]])
+# ZMIANA 1: Pracujemy na WYCZYSZCZONYCH danych (bean_clean)
+bean_clean[[class_column]] <- as.factor(bean_clean[[class_column]])
 
-# Sprawdzenie rozkładu klas
-print(table(bean_data[[class_column]]))
-
-
+# Sprawdzenie rozkładu klas po czyszczeniu
+cat("\nRozkład klas po czyszczeniu:\n")
+print(table(bean_clean[[class_column]]))
 
 # ----------------------------------------------------------
-## PODZIAŁ NA ZBÓR UCZĄCY I TESTOWY z zachowaniem proporcji klas
+## PODZIAŁ NA ZBIÓR UCZĄCY I TESTOWY (ze stratąfikacją)
 # ----------------------------------------------------------
-
 set.seed(42)
 
 train_indices <- unlist(
   tapply(
-    seq_len(nrow(bean_data)),
-    bean_data[[class_column]],
+    seq_len(nrow(bean_clean)),
+    bean_clean[[class_column]],
     function(indices) {
       sample(indices, size = floor(0.7 * length(indices)))
     }
   )
 )
 
-train_data <- bean_data[train_indices, ]
-test_data  <- bean_data[-train_indices, ]
+train_data <- bean_clean[train_indices, ]
+test_data  <- bean_clean[-train_indices, ]
 
-cat("Liczba obserwacji w zbiorze uczącym:", nrow(train_data), "\n")
+cat("\nLiczba obserwacji w zbiorze uczącym:", nrow(train_data), "\n")
 cat("Liczba obserwacji w zbiorze testowym:", nrow(test_data), "\n\n")
 
-
-
-# wykresy proporcji klas
-
+# --- WYKRESY PROPORCJI KLAS ---
 if (!requireNamespace("ggplot2", quietly = TRUE)) {
-  stop("Brakuje pakietu ggplot2. Zainstaluj go komendą: install.packages('ggplot2')")
+  stop("Brakuje pakietu ggplot2.")
 }
-
 library(ggplot2)
 
-class_levels <- levels(bean_data[[class_column]])
+class_levels <- levels(bean_clean[[class_column]])
 
 get_class_proportions <- function(data, set_name) {
   counts <- table(factor(data[[class_column]], levels = class_levels))
-
   data.frame(
     Zbior = set_name,
     Class = factor(names(counts), levels = class_levels),
@@ -366,69 +294,43 @@ get_class_proportions <- function(data, set_name) {
 }
 
 class_proportions <- rbind(
-  get_class_proportions(bean_data, "Cały zbiór"),
+  get_class_proportions(bean_clean, "Cały zbiór (oczyszczony)"),
   get_class_proportions(train_data, "Zbiór uczący"),
   get_class_proportions(test_data, "Zbiór testowy")
 )
 
-class_proportions$Procent <- paste0(
-  round(100 * class_proportions$Proportion, 1),
-  "%"
-)
+class_proportions$Procent <- paste0(round(100 * class_proportions$Proportion, 1), "%")
 
-# Jeden wspólny wykres PDF z trzema panelami
-plot_class_proportions <- ggplot(
-  class_proportions,
-  aes(x = Class, y = Proportion)
-) +
+plot_class_proportions <- ggplot(class_proportions, aes(x = Class, y = Proportion)) +
   geom_col() +
-  geom_text(
-    aes(label = Procent),
-    vjust = -0.3,
-    size = 3
-  ) +
+  geom_text(aes(label = Procent), vjust = -0.3, size = 3) +
   facet_wrap(~ Zbior, ncol = 1) +
-  scale_y_continuous(
-    labels = function(x) paste0(round(100 * x), "%"),
-    limits = c(0, max(class_proportions$Proportion) * 1.15)
-  ) +
-  labs(
-    title = "",
-    x = "Klasa fasoli",
-    y = "Udział obserwacji"
-  ) +
+  scale_y_continuous(labels = function(x) paste0(round(100 * x), "%"),
+                     limits = c(0, max(class_proportions$Proportion) * 1.15)) +
+  labs(title = "", x = "Klasa fasoli", y = "Udział obserwacji") +
   theme_minimal() +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1)
-  )
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-class_proportions_pdf <- file.path(
-  report_dir,
-  "proporcje_klas_original_train_test.pdf"
-)
-
-ggsave(
-  filename = class_proportions_pdf,
-  plot = plot_class_proportions,
-  width = 10,
-  height = 9
-)
-
+class_proportions_pdf <- file.path(report_dir, "proporcje_klas_original_train_test.pdf")
+ggsave(filename = class_proportions_pdf, plot = plot_class_proportions, width = 10, height = 9)
 cat("Zapisano wykres proporcji klas w pliku:", class_proportions_pdf, "\n")
 
 # ----------------------------------------------------------
-## SKALOWANIE ZMIENNYCH NUMERYCZNYCH oddzielnie dla zbioru uczącego i testowego, z wykorzystaniem parametrów ze zbioru uczącego
+## SKALOWANIE ZMIENNYCH NUMERYCZNYCH 
+## ZMIANA 2: Parametry liczone TYLKO ze zbioru uczącego!
 # ----------------------------------------------------------
 
-predictor_columns <- setdiff(names(bean_data), class_column)
-numeric_predictors <- predictor_columns[sapply(bean_data[predictor_columns], is.numeric)]
+predictor_columns <- setdiff(names(bean_clean), class_column)
+numeric_predictors <- predictor_columns[sapply(bean_clean[predictor_columns], is.numeric)]
 
 train_scaled <- train_data
 test_scaled <- test_data
 
+# Złota zasada: wyciągamy średnią i odchylenie tylko ze zbioru treningowego
 train_means <- sapply(train_data[numeric_predictors], mean, na.rm = TRUE)
 train_sds <- sapply(train_data[numeric_predictors], sd, na.rm = TRUE)
 
+# Skalujemy oba zbiory używając parametrów treningowych
 train_scaled[numeric_predictors] <- scale(
   train_data[numeric_predictors],
   center = train_means,
@@ -441,16 +343,17 @@ test_scaled[numeric_predictors] <- scale(
   scale = train_sds
 )
 
+cat("\nDane zostały poprawnie podzielone i przeskalowane (bez wycieku danych).\n")
 
-# Statystyki opisowe dla zbioru uczącego (po skalowaniu) - tylko dla zmiennych numerycznych
+# --- STATYSTYKI OPISOWE DLA ZBIORU UCZĄCEGO (po skalowaniu) ---
 numeric_summary <- data.frame(
-  Zmienna = numeric_columns,
-  Srednia = sapply(train_scaled[numeric_columns], mean, na.rm = TRUE),
-  Mediana = sapply(train_scaled[numeric_columns], median, na.rm = TRUE),
-  Minimum = sapply(train_scaled[numeric_columns], min, na.rm = TRUE),
-  Maksimum = sapply(train_scaled[numeric_columns], max, na.rm = TRUE),
-  OdchylenieStandardowe = sapply(train_scaled[numeric_columns], sd, na.rm = TRUE),
-  Skosnosc = sapply(train_scaled[numeric_columns], moments::skewness, na.rm = TRUE),
+  Zmienna = numeric_predictors,
+  Srednia = sapply(train_scaled[numeric_predictors], mean, na.rm = TRUE),
+  Mediana = sapply(train_scaled[numeric_predictors], median, na.rm = TRUE),
+  Minimum = sapply(train_scaled[numeric_predictors], min, na.rm = TRUE),
+  Maksimum = sapply(train_scaled[numeric_predictors], max, na.rm = TRUE),
+  OdchylenieStandardowe = sapply(train_scaled[numeric_predictors], sd, na.rm = TRUE),
+  Skosnosc = sapply(train_scaled[numeric_predictors], moments::skewness, na.rm = TRUE),
   row.names = NULL
 )
 
@@ -463,42 +366,15 @@ latex_tables <- list(
     booktabs = TRUE,
     position = "H",
     caption = "Statystyki opisowe zmiennych numerycznych dla zbioru uczącego (po skalowaniu)",
-    label = "statystyki-opisowe-numeryczne"
+    label = "statystyki-opisowe-numeryczne-scaled"
   )
 )
-
-if (length(categorical_columns) > 0) {
-  for (column_name in categorical_columns) {
-    frequency_table <- as.data.frame(table(bean_data[[column_name]], useNA = "ifany"))
-    names(frequency_table) <- c(column_name, "liczebnosc")
-
-    latex_tables[[length(latex_tables) + 1]] <- knitr::kable(
-      frequency_table,
-      format = "latex",
-      booktabs = TRUE,
-      position = "H",
-      caption = paste("Liczebnosci dla zmiennej", column_name),
-      label = paste0("liczebnosci-", column_name)
-    )
-  }
-}
 
 latex_output <- unlist(lapply(latex_tables, function(table) c(table, "")))
 latex_output_file <- file.path(report_dir, "tabele_statystyki_opisowe_przeskalowane.tex")
 writeLines(latex_output, latex_output_file)
 
-cat("Wczytano obserwacji:", nrow(bean_data), "\n")
-cat("Wczytano zmiennych:", ncol(bean_data), "\n\n")
 cat("Zapisano tabele LaTeX w pliku:", latex_output_file, "\n")
-
-
-
-
-
-
-
-
-
 
 
 # ----------------------------------------------------------
@@ -634,9 +510,111 @@ cat("Zapisano wyniki regresji logistycznej w pliku:", latex_multinom_output_file
 # ----------------------------------------------------------
 ## 3.2. RANDOM FOREST
 # ----------------------------------------------------------
+library(randomForest)
 
+# Ustawienie ziarna dla powtarzalności wyników
+set.seed(42)
 
+# Budowa modelu lasu losowego (500 drzew, obliczanie istotności cech)
+model_rf <- randomForest(
+  Class ~ .,
+  data = train_scaled,
+  ntree = 500,
+  importance = TRUE
+)
 
+# Wyświetlenie podsumowania modelu (w tym błędu Out-of-Bag)
+print(model_rf)
+
+# Predykcja klas na poprawnie wydzielonym i przeskalowanym zbiorze testowym
+pred_rf_class <- predict(
+  model_rf,
+  newdata = test_scaled,
+  type = "response"
+)
+
+# Predykcja prawdopodobieństw przynależności do klas (opcjonalnie)
+pred_rf_prob <- predict(
+  model_rf,
+  newdata = test_scaled,
+  type = "prob"
+)
+
+# Generowanie macierzy pomyłek
+conf_matrix_rf <- table(
+  Rzeczywista = test_scaled$Class,
+  Przewidziana = pred_rf_class
+)
+print("Macierz pomyłek dla Lasu Losowego:")
+print(conf_matrix_rf)
+
+# Obliczenie ogólnej dokładności (Accuracy)
+accuracy_rf <- mean(pred_rf_class == test_scaled$Class)
+cat("Accuracy dla Random Forest:", round(accuracy_rf, 4), "\n")
+
+# Wyznaczenie miar jakości dla poszczególnych klas (Precision, Recall, F1)
+metrics_rf <- calculate_class_metrics(conf_matrix_rf)
+metrics_rf[, c("Precision", "Recall", "F1")] <- round(
+  metrics_rf[, c("Precision", "Recall", "F1")],
+  4
+)
+print("Metryki dla poszczególnych klas:")
+print(metrics_rf)
+
+# Wyciągnięcie i zaokrąglenie ważności cech (Feature Importance)
+importance_rf <- as.data.frame(importance(model_rf))
+importance_rf$Zmienna <- rownames(importance_rf)
+importance_rf <- importance_rf[, c("Zmienna", "MeanDecreaseAccuracy", "MeanDecreaseGini")]
+importance_rf[, 2:3] <- round(importance_rf[, 2:3], 4)
+
+# Przygotowanie ramki danych z ogólnym wynikiem dokładności
+results_rf <- data.frame(
+  Metoda = "Random Forest (Las Losowy)",
+  Accuracy = round(accuracy_rf, 4)
+)
+
+# Generowanie kodu tabel LaTeX przy użyciu pakietu knitr
+latex_rf_tables <- list(
+  knitr::kable(
+    as.data.frame.matrix(conf_matrix_rf),
+    format = "latex",
+    booktabs = TRUE,
+    position = "H",
+    caption = "Macierz pomyłek dla lasu losowego (Random Forest)",
+    label = "conf-matrix-rf"
+  ),
+  knitr::kable(
+    results_rf,
+    format = "latex",
+    booktabs = TRUE,
+    position = "H",
+    caption = "Dokładność klasyfikacji dla lasu losowego",
+    label = "accuracy-rf"
+  ),
+  knitr::kable(
+    metrics_rf,
+    format = "latex",
+    booktabs = TRUE,
+    position = "H",
+    caption = "Miary jakości klasyfikacji dla lasu losowego dla poszczególnych odmian fasoli",
+    label = "metrics-rf"
+  ),
+  knitr::kable(
+    importance_rf,
+    format = "latex",
+    booktabs = TRUE,
+    position = "H",
+    caption = "Istotność zmiennych w modelu Random Forest",
+    label = "importance-rf"
+  )
+)
+
+# Połączenie tabel i zapis do pliku wynikowego .tex dla raportu
+latex_rf_output <- unlist(lapply(latex_rf_tables, function(table) c(table, "")))
+latex_rf_output_file <- file.path(report_dir, "wyniki_random_forest.tex")
+writeLines(latex_rf_output, latex_rf_output_file)
+
+cat("Wyniki metody Random Forest zostały pomyślnie zapisane w:", latex_rf_output_file, "\n")
 
 
 # ----------------------------------------------------------
@@ -655,7 +633,7 @@ model_neural_net <- nnet(
   data = train_scaled,
   size = 8,          # liczba neuronów w warstwie ukrytej
   decay = 0.001,     # regularyzacja wag
-  softmax = TRUE,    # interpretacja wyniku jako prawdopodobieństwo
+  #softmax = TRUE,    # interpretacja wyniku jako prawdopodobieństwo
   maxit = 1000,      # maksymalna liczba iteracji uczenia
   MaxNWts = 10000,   # zwiększenie limitu wag w sieci
   trace = TRUE
@@ -779,3 +757,4 @@ cat("Zapisano predykcje sieci neuronowej w pliku:", file.path(report_dir, "predy
 # ----------------------------------------------------------
 ## 5. SZTUCZNE DANE
 # ----------------------------------------------------------
+

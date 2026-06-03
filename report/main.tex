@@ -756,6 +756,24 @@ aby uniknąć ograniczeń technicznych związanych z liczbą parametrów sieci.
 
 \input{wyniki_siec_neuronowa.tex}
 
+% ----------------------------------------------------
+\section{Las losowy (Random Forest)}
+
+Las losowy (ang. \textit{Random Forest}) stanowi zaawansowaną metodę uczenia zespołowego (ang. \textit{ensemble learning}), łączącą podejście nieparametryczne z dużą elastycznością dopasowania. Algorytm ten bazuje na konstrukcji dużej liczby niezależnych od siebie algorytmów słabych — w tym przypadku pojedynczych drzew decyzyjnych — a następnie agregacji ich predykcji poprzez głosowanie większościowe.
+
+Kluczem do skuteczności lasu losowego jest redukcja wariancji pojedynczych drzew bez jednoczesnego zwiększania ich obciążenia. Cel ten osiągany jest poprzez wprowadzenie dwupoziomowej losowości:
+\begin{enumerate}
+    \item \textbf{Agregacja bootstrapowa (Bagging):} Każde drzewo w zespole trenowane jest na osobnym podzbiorze obserwacji, losowanym ze zwracaniem z oryginalnego zestawu danych treningowych. Obserwacje, które nie zostaną wybrane do próby uczącej danego drzewa, tworzą zbiór \textit{Out-of-Bag} (OOB) i są wykorzystywane do wewnętrznej, bezstronnej oceny błędu generalizacji modelu.
+    \item \textbf{Losowe podprzestrzenie cech (Random Subspace Method):} Podczas podziału węzła w procesie wzrostu drzewa, algorytm nie poszukuje optymalnego podziału spośród wszystkich dostępnych predyktorów. Zamiast tego wybiera losowy podzbiór cech o określonej liczności (standardowo dla klasyfikacji przyjmuje się pierwiastek z łącznej liczby cech). Procedura ta drastycznie zmniejsza skorelowanie poszczególnych drzew w lesie, dzięki czemu błędy pojedynczych klasyfikatorów wzajemnie się znoszą.
+\end{enumerate}
+
+Dla wektora cech geometrycznych ziarna, ostateczna decyzja klasyfikacyjna modelu podejmowana jest w oparciu o głosowanie większościowe wszystkich wygenerowanych drzew decyzyjnych. Algorytm pozwala także na precyzyjną ocenę istotności predyktorów w procesie różnicowania odmian fasoli za pomocą miar spadku dokładności klasyfikacji (MDA) oraz spadku nieczystości węzłów mierzony współczynnikiem Giniego (MDG).
+
+\subsection*{Metryki}
+
+Ewaluację modelu lasu losowego przeprowadzono na zbiorze testowym przy zachowaniu procedur preprocessingu (skalowanie predyktorów na podstawie parametrów wyznaczonych wyłącznie ze zbioru treningowego). Szczegółowe zestawienie macierzy pomyłek, ogólnej dokładności, miar jakości klasyfikacji dla poszczególnych odmian oraz istotności zmiennych przedstawiono w tabelach poniżej.
+
+\input{wyniki_random_forest.tex}
 
 % ----------------------------------------------------
 
