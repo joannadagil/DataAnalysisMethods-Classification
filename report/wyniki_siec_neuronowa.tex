@@ -1,0 +1,53 @@
+\begin{table}[H]
+
+\caption{\label{tab:conf-matrix-nn}Macierz pomyłek dla sieci neuronowej}
+\centering
+\begin{tabular}[t]{lrrrrrrr}
+\toprule
+  & BARBUNYA & BOMBAY & CALI & DERMASON & HOROZ & SEKER & SIRA\\
+\midrule
+BARBUNYA & 362 & 0 & 22 & 0 & 2 & 5 & 6\\
+BOMBAY & 1 & 156 & 0 & 0 & 0 & 0 & 0\\
+CALI & 6 & 0 & 471 & 0 & 11 & 0 & 1\\
+DERMASON & 0 & 0 & 0 & 999 & 3 & 13 & 49\\
+HOROZ & 1 & 0 & 9 & 7 & 545 & 0 & 17\\
+\addlinespace
+SEKER & 2 & 0 & 0 & 11 & 0 & 586 & 10\\
+SIRA & 3 & 0 & 4 & 92 & 5 & 7 & 680\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+
+\caption{\label{tab:accuracy-nn}Dokładność klasyfikacji dla sieci neuronowej}
+\centering
+\begin{tabular}[t]{lr}
+\toprule
+Metoda & Accuracy\\
+\midrule
+Sieć neuronowa & 0.9298\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+
+\caption{\label{tab:metrics-nn}Miary jakości klasyfikacji dla sieci neuronowej}
+\centering
+\begin{tabular}[t]{lrrr}
+\toprule
+Klasa & Precision & Recall & F1\\
+\midrule
+BARBUNYA & 0.9653 & 0.9118 & 0.9378\\
+BOMBAY & 1.0000 & 0.9936 & 0.9968\\
+CALI & 0.9308 & 0.9632 & 0.9467\\
+DERMASON & 0.9008 & 0.9389 & 0.9195\\
+HOROZ & 0.9629 & 0.9413 & 0.9520\\
+\addlinespace
+SEKER & 0.9591 & 0.9622 & 0.9607\\
+SIRA & 0.8912 & 0.8597 & 0.8752\\
+\bottomrule
+\end{tabular}
+\end{table}
+

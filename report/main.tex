@@ -600,7 +600,161 @@ Użyte jako punkt odniesienia klasyczne metody, takie jak wielomianowa regresja 
 
 \section{Wielomianowa regresja logistyczna}
 
+\subsection*{Metryki}
+
 \input{wyniki_regresja_logistyczna.tex}
+
+
+\section{Sieć neuronowa}
+
+
+W analizie zastosowano jednokierunkową, wielowarstwową sieć neuronową typu MLP, czyli \textit{Multilayer Perceptron}. 
+
+\subsection*{Architektura}
+
+Zastosowana sieć składała się z trzech głównych części: warstwy wejściowej, jednej warstwy ukrytej oraz warstwy wyjściowej. 
+
+
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    x=1cm, y=1cm,
+    >=Latex,
+    neuron/.style={circle, draw, minimum size=0.9cm, inner sep=0pt},
+    dots/.style={draw=none, fill=none},
+    every node/.style={font=\small}
+]
+
+% ------------------------
+% INPUT LAYER
+% ------------------------
+\node[neuron] (I1) at (0, 6) {$X_1$};
+\node[neuron] (I2) at (0, 4.3) {$X_2$};
+\node[neuron] (I3) at (0, 2.6) {$X_3$};
+\node[dots]   (Id) at (0, 1.4) {$\vdots$};
+\node[neuron] (I16) at (0, 0) {$X_{16}$};
+
+% ------------------------
+% HIDDEN LAYER
+% ------------------------
+\node[neuron] (H1) at (4, 6) {$h_1$};
+\node[neuron] (H2) at (4, 4.3) {$h_2$};
+\node[neuron] (H3) at (4, 2.6) {$h_3$};
+\node[dots]   (Hd) at (4, 1.4) {$\vdots$};
+\node[neuron] (H8) at (4, 0) {$h_8$};
+
+% ------------------------
+% OUTPUT LAYER
+% ------------------------
+\node[neuron] (O1) at (8, 6.0) {$y_1$};
+\node[neuron] (O2) at (8, 5.0) {$y_2$};
+\node[neuron] (O3) at (8, 4.0) {$y_3$};
+\node[neuron] (O4) at (8, 3.0) {$y_4$};
+\node[neuron] (O5) at (8, 2.0) {$y_5$};
+\node[neuron] (O6) at (8, 1.0) {$y_6$};
+\node[neuron] (O7) at (8, 0.0) {$y_7$};
+
+% ------------------------
+% CONNECTIONS INPUT -> HIDDEN
+% ------------------------
+\foreach \i in {1,2,3,16}
+{
+    \foreach \h in {1,2,3,8}
+    {
+        \draw[->, thin] (I\i) -- (H\h);
+    }
+}
+
+% connections from dots (visual suggestion only)
+%\draw[->, thin] (Id) -- (H1);
+%\draw[->, thin] (Id) -- (H8);
+%\draw[->, thin] (I1) -- (Hd);
+%\draw[->, thin] (I16) -- (Hd);
+
+% ------------------------
+% CONNECTIONS HIDDEN -> OUTPUT
+% ------------------------
+\foreach \h in {1,2,3,8}
+{
+    \foreach \o in {1,2,3,4,5,6,7}
+    {
+        \draw[->, thin] (H\h) -- (O\o);
+    }
+}
+
+% connections from hidden dots
+%\draw[->, thin] (Hd) -- (O1);
+%\draw[->, thin] (Hd) -- (O7);
+
+% ------------------------
+% LAYER LABELS
+% ------------------------
+\node[align=center, font=\bfseries] at (0, 6.9) {Warstwa\\wejściowa};
+\node[align=center, font=\bfseries] at (4, 6.9) {Warstwa\\ukryta};
+\node[align=center, font=\bfseries] at (8, 6.9) {Warstwa\\wyjściowa};
+
+% ------------------------
+% EXTRA LABELS
+% ------------------------
+\node[align=center] at (0, -1.0) {16 cech};
+\node[align=center] at (4, -1.0) {8 neuronów};
+\node[align=center] at (8, -1.0) {7 klas};
+
+% ------------------------
+% OUTPUT CLASS NAMES
+% ------------------------
+\node[anchor=west] at (8.7, 6.0) {\textit{SEKER}};
+\node[anchor=west] at (8.7, 5.0) {\textit{BARBUNYA}};
+\node[anchor=west] at (8.7, 4.0) {\textit{BOMBAY}};
+\node[anchor=west] at (8.7, 3.0) {\textit{CALI}};
+\node[anchor=west] at (8.7, 2.0) {\textit{DERMASON}};
+\node[anchor=west] at (8.7, 1.0) {\textit{HOROZ}};
+\node[anchor=west] at (8.7, 0.0) {\textit{SIRA}};
+
+\end{tikzpicture}
+\caption{Schemat architektury zastosowanej sieci neuronowej.}
+\label{fig:siec-neuronowa}
+\end{figure}
+
+
+Zastosowana sieć składała się z trzech głównych części: warstwy wejściowej, jednej warstwy ukrytej oraz warstwy wyjściowej. Warstwa wejściowa miała tyle wejść, ile zmiennych objaśniających. 
+
+Pomiędzy warstwą wejściową a warstwą wyjściową zastosowano jedną warstwę ukrytą złożoną z 8 neuronów. Liczbę neuronów w tej warstwie określa parametr \texttt{size}. W przeprowadzonej analizie przyjęto:
+\[
+\texttt{size} = 8.
+\]
+Warstwa ukryta umożliwia modelowi uchwycenie nieliniowych zależności między cechami wejściowymi a klasą fasoli. Dzięki temu sieć neuronowa może modelować bardziej złożone granice decyzyjne niż metody liniowe, takie jak wielomianowa regresja logistyczna czy LDA.
+
+%funkcja aktywacji
+
+W warstwie wyjściowej zastosowano tyle neuronów, ile było klas zmiennej objaśnianej, czyli 7. 
+
+
+Ponieważ analizowany problem jest problemem klasyfikacji wieloklasowej, na warstwie wyjściowej zastosowano funkcję \textit{softmax}. Ostateczna klasyfikacja odbywa się poprzez wybór klasy o największym przewidywanym prawdopodobieństwie.
+
+
+W modelu zastosowano również regularyzację wag określoną parametrem \texttt{decay}. W analizie przyjęto:
+\[
+\texttt{decay} = 0.001.
+\]
+Regularyzacja ogranicza nadmierny wzrost wartości wag, co zmniejsza ryzyko przeuczenia modelu. Oznacza to, że sieć nie tylko dopasowuje się do danych uczących, ale jest również zachęcana do zachowania prostszej struktury wag.
+
+
+
+Proces uczenia sieci polegał na iteracyjnym doborze wag połączeń między neuronami w taki sposób, aby minimalizować błąd klasyfikacji na zbiorze uczącym. Maksymalną liczbę iteracji ustalono na:
+\[
+\texttt{maxit} = 1000.
+\]
+Dodatkowo parametr \texttt{MaxNWts} określał maksymalną dopuszczalną liczbę wag w modelu. W analizie ustawiono:
+\[
+\texttt{MaxNWts} = 10000,
+\]
+aby uniknąć ograniczeń technicznych związanych z liczbą parametrów sieci.
+
+\subsection*{Metryki}
+
+\input{wyniki_siec_neuronowa.tex}
 
 
 % ----------------------------------------------------

@@ -1,4 +1,6 @@
-# Wczytanie danych i statystyki opisowe
+# ----------------------------------------------------------
+## Wczytanie danych i statystyki opisowe
+# ----------------------------------------------------------
 
 library(moments)
 library(knitr)
@@ -316,7 +318,12 @@ bean_data[[class_column]] <- as.factor(bean_data[[class_column]])
 # Sprawdzenie rozkładu klas
 print(table(bean_data[[class_column]]))
 
+
+
+# ----------------------------------------------------------
 ## PODZIAŁ NA ZBÓR UCZĄCY I TESTOWY z zachowaniem proporcji klas
+# ----------------------------------------------------------
+
 set.seed(42)
 
 train_indices <- unlist(
@@ -409,8 +416,9 @@ ggsave(
 
 cat("Zapisano wykres proporcji klas w pliku:", class_proportions_pdf, "\n")
 
-
+# ----------------------------------------------------------
 ## SKALOWANIE ZMIENNYCH NUMERYCZNYCH oddzielnie dla zbioru uczącego i testowego, z wykorzystaniem parametrów ze zbioru uczącego
+# ----------------------------------------------------------
 
 predictor_columns <- setdiff(names(bean_data), class_column)
 numeric_predictors <- predictor_columns[sapply(bean_data[predictor_columns], is.numeric)]
@@ -493,9 +501,9 @@ cat("Zapisano tabele LaTeX w pliku:", latex_output_file, "\n")
 
 
 
-
-
+# ----------------------------------------------------------
 ## 3.1 WIELOMIANOWA REGRESJA LOGISTYCZNA
+# ----------------------------------------------------------
 
 # dopasowywanie modelu
 model_multinom <- multinom(
@@ -623,3 +631,151 @@ writeLines(latex_multinom_output, latex_multinom_output_file)
 cat("Zapisano wyniki regresji logistycznej w pliku:", latex_multinom_output_file, "\n")
 
 
+# ----------------------------------------------------------
+## 3.2. RANDOM FOREST
+# ----------------------------------------------------------
+
+
+
+
+
+# ----------------------------------------------------------
+## 3.3. SIEĆ NEURONOWA
+# ----------------------------------------------------------
+# klasyczny klasyfikator wieloklasowy
+# warstwa wejściowa z tyloma wejściami ile jest cech
+# jedna warstwa ukryta z 8 neuronami
+# warstwa wyjściowa ma tyle neuronów ile klas - gatunków fasoli
+# dla klasyfikacji wieloklasowej zastosowano funkcję softmax.
+
+set.seed(42)
+
+model_neural_net <- nnet(
+  Class ~ .,         # wykorzystujemy wszystkie cechy
+  data = train_scaled,
+  size = 8,          # liczba neuronów w warstwie ukrytej
+  decay = 0.001,     # regularyzacja wag
+  softmax = TRUE,    # interpretacja wyniku jako prawdopodobieństwo
+  maxit = 1000,      # maksymalna liczba iteracji uczenia
+  MaxNWts = 10000,   # zwiększenie limitu wag w sieci
+  trace = TRUE
+)
+
+summary(model_neural_net)
+
+
+# predykcja klas i prawdopodobieństw
+
+pred_nn_class <- predict(
+  model_neural_net,
+  newdata = test_scaled,
+  type = "class"
+)
+
+pred_nn_class <- factor(pred_nn_class, levels = levels(test_scaled$Class))
+
+pred_nn_prob <- predict(
+  model_neural_net,
+  newdata = test_scaled,
+  type = "raw"
+)
+
+
+# ocena jakości klasyfikacji
+
+conf_matrix_nn <- table(
+  Rzeczywista = test_scaled$Class,
+  Przewidziana = pred_nn_class
+)
+
+print(conf_matrix_nn)
+
+accuracy_nn <- mean(pred_nn_class == test_scaled$Class)
+
+cat("Accuracy dla sieci neuronowej:", accuracy_nn, "\n")
+
+metrics_nn <- calculate_class_metrics(conf_matrix_nn)
+
+metrics_nn[, c("Precision", "Recall", "F1")] <- round(
+  metrics_nn[, c("Precision", "Recall", "F1")],
+  4
+)
+
+print(metrics_nn)
+
+
+
+# Zapis predykcji i wyników
+
+predictions_nn <- data.frame(
+  Rzeczywista = test_scaled$Class,
+  Przewidziana = pred_nn_class,
+  pred_nn_prob
+)
+
+# Opcjonalnie: czytelniejsze nazwy kolumn z prawdopodobieństwami
+names(predictions_nn)[3:ncol(predictions_nn)] <- paste0(
+  "P_",
+  make.names(colnames(pred_nn_prob))
+)
+
+write.csv(
+  predictions_nn,
+  file = file.path(report_dir, "predykcje_siec_neuronowa.csv"),
+  row.names = FALSE
+)
+
+results_nn <- data.frame(
+  Metoda = "Sieć neuronowa",
+  Accuracy = round(accuracy_nn, 4)
+)
+
+latex_nn_tables <- list(
+  knitr::kable(
+    as.data.frame.matrix(conf_matrix_nn),
+    format = "latex",
+    booktabs = TRUE,
+    position = "H",
+    caption = "Macierz pomyłek dla sieci neuronowej",
+    label = "conf-matrix-nn"
+  ),
+  knitr::kable(
+    results_nn,
+    format = "latex",
+    booktabs = TRUE,
+    position = "H",
+    caption = "Dokładność klasyfikacji dla sieci neuronowej",
+    label = "accuracy-nn"
+  ),
+  knitr::kable(
+    metrics_nn,
+    format = "latex",
+    booktabs = TRUE,
+    position = "H",
+    caption = "Miary jakości klasyfikacji dla sieci neuronowej",
+    label = "metrics-nn"
+  )
+)
+
+latex_nn_output <- unlist(lapply(latex_nn_tables, function(table) c(table, "")))
+
+latex_nn_output_file <- file.path(report_dir, "wyniki_siec_neuronowa.tex")
+
+writeLines(latex_nn_output, latex_nn_output_file)
+
+cat("Zapisano wyniki sieci neuronowej w pliku:", latex_nn_output_file, "\n")
+cat("Zapisano predykcje sieci neuronowej w pliku:", file.path(report_dir, "predykcje_siec_neuronowa.csv"), "\n")
+
+
+
+
+# ----------------------------------------------------------
+## 3.4. METODA HYBRYDOWA
+# ----------------------------------------------------------
+
+
+
+
+# ----------------------------------------------------------
+## 5. SZTUCZNE DANE
+# ----------------------------------------------------------

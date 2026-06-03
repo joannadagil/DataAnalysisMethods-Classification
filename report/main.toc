@@ -21,4 +21,5 @@
 \contentsline {section}{\numberline {4.1}Mierniki}{13}{section.4.1}%
 \contentsline {section}{\numberline {4.2}Sposób walidacji}{13}{section.4.2}%
 \contentsline {section}{\numberline {4.3}Wielomianowa regresja logistyczna}{13}{section.4.3}%
-\contentsline {chapter}{\numberline {5}Przykład użycia modeli na stworzonych sztucznie obserwacjach}{14}{chapter.5}%
+\contentsline {section}{\numberline {4.4}Sieć neuronowa}{14}{section.4.4}%
+\contentsline {chapter}{\numberline {5}Przykład użycia modeli na stworzonych sztucznie obserwacjach}{16}{chapter.5}%
