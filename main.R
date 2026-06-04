@@ -751,7 +751,124 @@ cat("Zapisano predykcje sieci neuronowej w pliku:", file.path(report_dir, "predy
 ## 3.4. METODA HYBRYDOWA
 # ----------------------------------------------------------
 
+# Predykcje z wcześniej wytrenowanych modeli:
+# pred_multinom_class
+# pred_rf_class
+# pred_nn_class
 
+hybrid_predictions <- data.frame(
+  Logistic = as.character(pred_multinom_class),
+  RandomForest = as.character(pred_rf_class),
+  NeuralNet = as.character(pred_nn_class)
+)
+
+# Funkcja głosowania większościowego
+majority_vote <- function(x) {
+  names(sort(table(x), decreasing = TRUE))[1]
+}
+
+pred_hybrid_class <- apply(
+  hybrid_predictions,
+  1,
+  majority_vote
+)
+
+pred_hybrid_class <- factor(
+  pred_hybrid_class,
+  levels = levels(test_scaled$Class)
+)
+
+# ----------------------------------------------------------
+# OCENA MODELU HYBRYDOWEGO
+# ----------------------------------------------------------
+
+conf_matrix_hybrid <- table(
+  Rzeczywista = test_scaled$Class,
+  Przewidziana = pred_hybrid_class
+)
+
+print("Macierz pomyłek dla metody hybrydowej:")
+print(conf_matrix_hybrid)
+
+accuracy_hybrid <- mean(
+  pred_hybrid_class == test_scaled$Class
+)
+
+cat(
+  "Accuracy dla metody hybrydowej:",
+  round(accuracy_hybrid, 4),
+  "\n"
+)
+
+metrics_hybrid <- calculate_class_metrics(
+  conf_matrix_hybrid
+)
+
+metrics_hybrid[, c("Precision", "Recall", "F1")] <- round(
+  metrics_hybrid[, c("Precision", "Recall", "F1")],
+  4
+)
+
+print(metrics_hybrid)
+
+# ----------------------------------------------------------
+# ZAPIS WYNIKÓW LATEX
+# ----------------------------------------------------------
+
+results_hybrid <- data.frame(
+  Metoda = "Metoda hybrydowa (Voting Ensemble)",
+  Accuracy = round(accuracy_hybrid, 4)
+)
+
+latex_hybrid_tables <- list(
+  knitr::kable(
+    as.data.frame.matrix(conf_matrix_hybrid),
+    format = "latex",
+    booktabs = TRUE,
+    position = "H",
+    caption = "Macierz pomyłek dla metody hybrydowej",
+    label = "conf-matrix-hybrid"
+  ),
+  knitr::kable(
+    results_hybrid,
+    format = "latex",
+    booktabs = TRUE,
+    position = "H",
+    caption = "Dokładność klasyfikacji dla metody hybrydowej",
+    label = "accuracy-hybrid"
+  ),
+  knitr::kable(
+    metrics_hybrid,
+    format = "latex",
+    booktabs = TRUE,
+    position = "H",
+    caption = "Miary jakości klasyfikacji dla metody hybrydowej",
+    label = "metrics-hybrid"
+  )
+)
+
+latex_hybrid_output <- unlist(
+  lapply(
+    latex_hybrid_tables,
+    function(table) c(table, "")
+  )
+)
+
+latex_hybrid_output_file <- file.path(
+  report_dir,
+  "wyniki_hybrydowe.tex"
+)
+
+writeLines(
+  latex_hybrid_output,
+  latex_hybrid_output_file
+)
+
+cat(
+  "Zapisano wyniki metody hybrydowej w pliku:",
+  latex_hybrid_output_file,
+  "\n"
+)
 
 
 # ----------------------------------------------------------

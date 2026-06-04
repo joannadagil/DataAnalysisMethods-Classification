@@ -1,0 +1,53 @@
+\begin{table}[H]
+
+\caption{\label{tab:conf-matrix-hybrid}Macierz pomyłek dla metody hybrydowej}
+\centering
+\begin{tabular}[t]{lrrrrrrr}
+\toprule
+  & BARBUNYA & BOMBAY & CALI & DERMASON & HOROZ & SEKER & SIRA\\
+\midrule
+BARBUNYA & 339 & 0 & 12 & 0 & 0 & 0 & 2\\
+BOMBAY & 0 & 140 & 0 & 0 & 0 & 0 & 0\\
+CALI & 10 & 0 & 439 & 0 & 2 & 0 & 1\\
+DERMASON & 0 & 0 & 0 & 923 & 0 & 11 & 44\\
+HOROZ & 0 & 0 & 6 & 0 & 479 & 0 & 1\\
+\addlinespace
+SEKER & 0 & 0 & 0 & 4 & 0 & 522 & 4\\
+SIRA & 0 & 0 & 0 & 64 & 3 & 2 & 652\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+
+\caption{\label{tab:accuracy-hybrid}Dokładność klasyfikacji dla metody hybrydowej}
+\centering
+\begin{tabular}[t]{lr}
+\toprule
+Metoda & Accuracy\\
+\midrule
+Metoda hybrydowa (Voting Ensemble) & 0.9546\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+
+\caption{\label{tab:metrics-hybrid}Miary jakości klasyfikacji dla metody hybrydowej}
+\centering
+\begin{tabular}[t]{lrrr}
+\toprule
+Klasa & Precision & Recall & F1\\
+\midrule
+BARBUNYA & 0.9713 & 0.9603 & 0.9658\\
+BOMBAY & 1.0000 & 1.0000 & 1.0000\\
+CALI & 0.9606 & 0.9712 & 0.9659\\
+DERMASON & 0.9314 & 0.9438 & 0.9375\\
+HOROZ & 0.9897 & 0.9856 & 0.9876\\
+\addlinespace
+SEKER & 0.9757 & 0.9849 & 0.9803\\
+SIRA & 0.9261 & 0.9043 & 0.9151\\
+\bottomrule
+\end{tabular}
+\end{table}
+

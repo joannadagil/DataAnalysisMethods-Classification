@@ -567,7 +567,13 @@ W przeprowadzonej analizie wielomianowa regresja logistyczna została wykorzysta
 
 \section{Metoda hybrydowa}
 
-% TODO
+Metoda hybrydowa należy do grupy metod zespołowych (ensemble methods), których celem jest połączenie wyników wielu klasyfikatorów w celu poprawy jakości klasyfikacji. W przedstawionym rozwiązaniu wykorzystano trzy wcześniej zbudowane modele: wielomianową regresję logistyczną, las losowy (Random Forest) oraz sieć neuronową.
+
+Każdy z modeli generował niezależną predykcję klasy dla obserwacji ze zbioru testowego. Następnie zastosowano mechanizm głosowania większościowego (majority voting). Ostateczną klasę przypisywano na podstawie największej liczby głosów oddanych przez poszczególne modele.
+
+Przykładowo, jeśli dwa spośród trzech klasyfikatorów wskazywały tę samą klasę, była ona przyjmowana jako wynik końcowy. Takie podejście pozwala ograniczyć wpływ błędów pojedynczego modelu oraz zwiększyć stabilność procesu klasyfikacji.
+
+Zastosowanie metody hybrydowej umożliwia wykorzystanie zalet różnych algorytmów. Regresja logistyczna dobrze modeluje zależności liniowe, Random Forest skutecznie identyfikuje zależności nieliniowe i interakcje pomiędzy cechami, natomiast sieci neuronowe pozwalają wykrywać bardziej złożone wzorce występujące w danych. Dzięki temu model zespołowy może osiągać lepsze wyniki niż pojedyncze klasyfikatory.
 
 
 
@@ -776,7 +782,17 @@ Ewaluację modelu lasu losowego przeprowadzono na zbiorze testowym przy zachowan
 \input{wyniki_random_forest.tex}
 
 % ----------------------------------------------------
+\section{Metoda hybrydowa}
 
+W celu sprawdzenia, czy połączenie kilku klasyfikatorów pozwoli uzyskać lepsze wyniki klasyfikacji, zastosowano metodę hybrydową. Końcowa decyzja klasyfikacyjna była wyznaczana na podstawie głosowania większościowego trzech modeli: wielomianowej regresji logistycznej, lasu losowego oraz sieci neuronowej.
+
+Poniżej przedstawiono wyniki uzyskane przez model hybrydowy na zbiorze testowym. Zaprezentowano macierz pomyłek, dokładność klasyfikacji oraz wartości miar Precision, Recall i F1-score dla poszczególnych klas fasoli.
+
+\input{wyniki_hybrydowe.tex}
+
+Uzyskane wyniki pozwalają ocenić skuteczność podejścia zespołowego oraz porównać je z rezultatami osiągniętymi przez pojedyncze modele przedstawione we wcześniejszych podrozdziałach.
+
+% ----------------------------------------------------
 
 \chapter{Przykład użycia modeli na stworzonych sztucznie obserwacjach}
 
