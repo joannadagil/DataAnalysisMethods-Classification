@@ -796,11 +796,17 @@ Uzyskane wyniki pozwalają ocenić skuteczność podejścia zespołowego oraz po
 
 \chapter{Przykład użycia modeli na stworzonych sztucznie obserwacjach}
 
+Oprócz oceny modeli na zbiorze testowym przygotowano również krótki przykład użycia klasyfikatorów na obserwacjach sztucznie wygenerowanych. Celem tej części nie jest ponowna walidacja jakości modeli, ponieważ sztuczne obserwacje nie pochodzą z rzeczywistego pomiaru. Przykład pokazuje natomiast, w jaki sposób wytrenowane modele można wykorzystać do klasyfikacji nowych rekordów o znanych wartościach cech geometrycznych.
 
+Sztuczne obserwacje zostały wygenerowane osobno dla każdej odmiany fasoli. Dla każdej klasy wyznaczono średnie oraz odchylenia standardowe cech numerycznych w zbiorze uczącym, a następnie wylosowano przykładowe punkty położone blisko typowych wartości danej klasy. Aby uniknąć tworzenia nierealistycznych rekordów, wartości zostały ograniczone do zakresów obserwowanych w zbiorze uczącym.
 
+Następnie sztuczne dane poddano takiemu samemu przeskalowaniu jak zbiór testowy. Wykorzystano do tego średnie i odchylenia standardowe obliczone wyłącznie na zbiorze uczącym, dzięki czemu zachowano spójność z procedurą preprocessingu zastosowaną przy trenowaniu modeli.
 
+Dla każdej sztucznej obserwacji wykonano predykcję za pomocą czterech podejść: wielomianowej regresji logistycznej, lasu losowego, sieci neuronowej oraz metody hybrydowej. W przypadku metody hybrydowej ostateczna klasa została wyznaczona przez głosowanie większościowe trzech pojedynczych klasyfikatorów.
 
+\input{wyniki_sztuczne_dane.tex}
 
+W tabeli kolumna \textit{Klasa bazowa} oznacza klasę, na podstawie której wygenerowano daną sztuczną obserwację. Nie jest to rzeczywista etykieta pomiarowa, lecz punkt odniesienia pozwalający sprawdzić, czy modele przypisują wygenerowane obserwacje do klas zgodnych z ich konstrukcją. Zgodność predykcji z klasą bazową sugeruje, że model poprawnie rozpoznaje typowe układy cech charakterystyczne dla danej odmiany fasoli.
 
 
 
