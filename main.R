@@ -870,8 +870,133 @@ cat(
   "\n"
 )
 
-
 # ----------------------------------------------------------
 ## 5. SZTUCZNE DANE
 # ----------------------------------------------------------
 
+set.seed(123)
+
+n_synthetic_per_class <- 2
+
+# Funkcja tworząca sztuczne obserwacje na podstawie rozkładu cech
+# w zbiorze uczącym po skalowaniu. Dzięki temu dane są od razu w takiej
+# postaci, w jakiej oczekują ich wytrenowane modele.
+generate_synthetic_observations <- function(reference_data, class_column, numeric_predictors, n_per_class = 2) {
+  synthetic_list <- list()
+  class_levels <- levels(reference_data[[class_column]])
+  
+  for (class_name in class_levels) {
+    class_data <- reference_data[reference_data[[class_column]] == class_name, numeric_predictors]
+    
+    class_means <- sapply(class_data, mean, na.rm = TRUE)
+    class_sds <- sapply(class_data, sd, na.rm = TRUE)
+    class_sds <- ifelse(is.na(class_sds) | class_sds == 0, 0.001, class_sds * 0.25)
+    
+    synthetic_class <- as.data.frame(
+      matrix(
+        NA,
+        nrow = n_per_class,
+        ncol = length(numeric_predictors)
+      )
+    )
+    names(synthetic_class) <- numeric_predictors
+    
+    for (var in numeric_predictors) {
+      synthetic_values <- rnorm(
+        n = n_per_class,
+        mean = class_means[var],
+        sd = class_sds[var]
+      )
+      
+      # Ograniczenie do zakresu wartości obserwowanego w zbiorze uczącym
+      # zapobiega tworzeniu zbyt skrajnych punktów.
+      synthetic_values <- pmin(
+        pmax(synthetic_values, min(reference_data[[var]], na.rm = TRUE)),
+        max(reference_data[[var]], na.rm = TRUE)
+      )
+      
+      synthetic_class[[var]] <- synthetic_values
+    }
+    
+    synthetic_class[[class_column]] <- factor(class_name, levels = class_levels)
+    synthetic_list[[class_name]] <- synthetic_class
+  }
+  
+  do.call(rbind, synthetic_list)
+}
+
+synthetic_scaled <- generate_synthetic_observations(
+  reference_data = train_scaled,
+  class_column = class_column,
+  numeric_predictors = numeric_predictors,
+  n_per_class = n_synthetic_per_class
+)
+
+synthetic_scaled$Numer <- seq_len(nrow(synthetic_scaled))
+
+synthetic_pred_multinom <- predict(
+  model_multinom,
+  newdata = synthetic_scaled,
+  type = "class"
+)
+
+synthetic_pred_rf <- predict(
+  model_rf,
+  newdata = synthetic_scaled,
+  type = "response"
+)
+
+synthetic_pred_nn <- predict(
+  model_neural_net,
+  newdata = synthetic_scaled,
+  type = "class"
+)
+
+synthetic_hybrid_votes <- data.frame(
+  Logistic = as.character(synthetic_pred_multinom),
+  RandomForest = as.character(synthetic_pred_rf),
+  NeuralNet = as.character(synthetic_pred_nn)
+)
+
+synthetic_pred_hybrid <- apply(
+  synthetic_hybrid_votes,
+  1,
+  majority_vote
+)
+
+synthetic_results <- data.frame(
+  Nr = synthetic_scaled$Numer,
+  Klasa_bazowa = as.character(synthetic_scaled[[class_column]]),
+  Regresja_logistyczna = as.character(synthetic_pred_multinom),
+  Random_Forest = as.character(synthetic_pred_rf),
+  Siec_neuronowa = as.character(synthetic_pred_nn),
+  Metoda_hybrydowa = as.character(synthetic_pred_hybrid)
+)
+
+print("Predykcje modeli dla sztucznych obserwacji:")
+print(synthetic_results)
+
+latex_synthetic_output <- knitr::kable(
+  synthetic_results,
+  format = "latex",
+  booktabs = TRUE,
+  position = "H",
+  caption = "Predykcje modeli dla sztucznie wygenerowanych obserwacji",
+  label = "synthetic-predictions"
+)
+
+latex_synthetic_output_file <- file.path(
+  report_dir,
+  "wyniki_sztuczne_dane.tex"
+)
+
+writeLines(
+  latex_synthetic_output,
+  latex_synthetic_output_file
+)
+
+cat(
+  "Zapisano tabelę LaTeX z predykcjami dla sztucznych danych w pliku:",
+  latex_synthetic_output_file,
+  "\n"
+)
