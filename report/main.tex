@@ -518,7 +518,28 @@ W przeprowadzonej analizie wielomianowa regresja logistyczna została wykorzysta
 
 \section{Random Forest}
 
-% TODO
+Las losowy (ang. \textit{Random Forest}) jest metodą zespołową opartą na wielu drzewach decyzyjnych. Każde drzewo tworzy własną regułę klasyfikacyjną, natomiast końcowa predykcja klasy jest wyznaczana przez głosowanie wszystkich drzew. Dla obserwacji $x$ i zbioru $B$ drzew klasyfikacyjnych można to zapisać jako:
+\[
+\hat{Y}(x)=\operatorname{mode}\left\{h_1(x),h_2(x),\ldots,h_B(x)\right\},
+\]
+gdzie $h_b(x)$ oznacza klasę przewidzianą przez $b$-te drzewo, a operator $\operatorname{mode}$ zwraca najczęściej występującą klasę.
+
+Różnorodność drzew uzyskuje się przez zastosowanie dwóch mechanizmów losowych. Po pierwsze, każde drzewo jest budowane na osobnej próbie bootstrapowej, czyli próbie wylosowanej ze zwracaniem ze zbioru uczącego. Obserwacje, które nie znalazły się w próbie użytej do budowy danego drzewa, tworzą zbiór \textit{Out-of-Bag} (OOB) i mogą służyć do wewnętrznej oceny błędu modelu.
+
+Po drugie, podczas wyznaczania każdego podziału drzewa rozważany jest jedynie losowy podzbiór dostępnych zmiennych objaśniających. Ogranicza to podobieństwo poszczególnych drzew i zmniejsza ryzyko, że wszystkie z nich będą budowane przede wszystkim na podstawie tych samych, najsilniejszych predyktorów. W klasyfikacji domyślna liczba cech rozważanych przy pojedynczym podziale wynosi zwykle około $\sqrt{p}$, gdzie $p$ jest liczbą zmiennych objaśniających.
+
+Jakość potencjalnego podziału węzła jest oceniana na podstawie zmniejszenia jego nieczystości. W zastosowanej implementacji wykorzystywany jest indeks Giniego. Dla węzła $m$ ma on postać:
+\[
+G(m)=1-\sum_{k=1}^{K}\hat{p}_{mk}^{2},
+\]
+gdzie $\hat{p}_{mk}$ oznacza udział obserwacji klasy $k$ w węźle $m$. Wartość indeksu jest mała, gdy w węźle dominują obserwacje jednej klasy. Algorytm wybiera takie podziały, które prowadzą do możliwie największego zmniejszenia nieczystości węzłów potomnych.
+
+W projekcie model zbudowano przy użyciu funkcji \texttt{randomForest} z pakietu o tej samej nazwie. Zastosowano $500$ drzew oraz włączono wyznaczanie istotności zmiennych. Pozostałe parametry, w tym liczba cech losowanych przy każdym podziale, pozostawiono na wartościach domyślnych dla zadania klasyfikacyjnego. Ustawienie ziarna generatora liczb losowych na wartość $42$ zapewnia powtarzalność wyników.
+
+Oprócz przewidywanych klas model zwraca prawdopodobieństwa przynależności do poszczególnych odmian fasoli. Wyznaczono również dwie miary istotności predyktorów: \textit{Mean Decrease Accuracy}, opisującą spadek trafności po zaburzeniu wartości danej cechy, oraz \textit{Mean Decrease Gini}, określającą łączny udział cechy w zmniejszaniu nieczystości węzłów.
+
+Zaletą lasu losowego jest możliwość modelowania zależności nieliniowych i interakcji między cechami bez konieczności wcześniejszego określania ich postaci. Metoda jest także mniej podatna na przeuczenie niż pojedyncze, głębokie drzewo decyzyjne. Jej ograniczeniem jest natomiast mniejsza interpretowalność w porównaniu z pojedynczym modelem parametrycznym, takim jak regresja logistyczna.
+
 
 % Lasy losowe (ang. \textit{Random Forest}) to zaawansowany algorytm uczenia maszynowego należący do rodziny metod zespołowych (ang. \textit{ensemble methods}). Podstawą tej metody jest konstruowanie wielu niezależnych drzew decyzyjnych w fazie trenowania modelu. Ostateczna decyzja klasyfikacyjna podejmowana jest poprzez agregację wyników wszystkich pojedynczych drzew za pomocą głosowania większościowego – obserwacja jest przypisywana do klasy, którą wskazała najliczniejsza grupa drzew decyzyjnych.
 
@@ -563,29 +584,61 @@ W przeprowadzonej analizie wielomianowa regresja logistyczna została wykorzysta
 
 \section{Sieć neuronowa}
 
-% TODO
+W analizie zastosowano jednokierunkową wielowarstwową sieć neuronową typu MLP (ang. \textit{Multilayer Perceptron}). Model składa się z warstwy wejściowej, jednej warstwy ukrytej oraz warstwy wyjściowej. Warstwa wejściowa zawiera $12$ wejść odpowiadających zmiennym objaśniającym wykorzystanym w projekcie, natomiast warstwa wyjściowa reprezentuje siedem możliwych klas fasoli.
+
+Dla neuronu $j$ w warstwie ukrytej obliczana jest kombinacja liniowa wartości wejściowych, a następnie stosowana jest nieliniowa funkcja aktywacji:
+\[
+z_j=f\left(b_j+\sum_{i=1}^{p}w_{ij}x_i\right),
+\]
+gdzie $x_i$ oznacza wartość $i$-tej cechy, $w_{ij}$ jest wagą połączenia, $b_j$ wyrazem wolnym, a $f$ funkcją aktywacji. Dzięki zastosowaniu warstwy ukrytej sieć może odwzorowywać zależności nieliniowe, których nie uwzględnia wielomianowa regresja logistyczna.
+
+W warstwie wyjściowej dla każdej klasy wyznaczany jest wynik, który następnie przekształca się za pomocą funkcji softmax:
+\[
+P(Y=k\mid X)=\frac{\exp(a_k)}{\sum_{j=1}^{K}\exp(a_j)},
+\]
+gdzie $a_k$ oznacza wartość wejściową neuronu odpowiadającego klasie $k$. Otrzymane wartości są nieujemne i sumują się do jedności, dlatego mogą być interpretowane jako przewidywane prawdopodobieństwa przynależności do poszczególnych klas. Ostatecznie wybierana jest klasa o największym prawdopodobieństwie:
+\[
+\hat{Y}=\arg\max_k P(Y=k\mid X).
+\]
+
+Sieć została zbudowana za pomocą funkcji \texttt{nnet} z pakietu \texttt{nnet}. Zastosowano jedną warstwę ukrytą złożoną z $8$ neuronów. Maksymalną liczbę iteracji uczenia ustawiono na $1000$, a limit liczby wag na $10000$. Przed uczeniem ustawiono ziarno generatora liczb losowych na wartość $42$, aby wyniki były powtarzalne.
+
+W modelu zastosowano regularyzację wag określoną parametrem \texttt{decay}=0{,}001. Oznacza ona dodanie do funkcji celu kary za duże wartości wag. Mechanizm ten ogranicza nadmierne dopasowanie sieci do zbioru uczącego i sprzyja uzyskaniu modelu o lepszych zdolnościach generalizacyjnych.
+
+Uczenie modelu polega na iteracyjnym doborze wag i wyrazów wolnych tak, aby zmniejszać błąd predykcji na zbiorze uczącym. Ponieważ zmienna objaśniana jest faktorem obejmującym więcej niż dwie klasy, funkcja \texttt{nnet} realizuje klasyfikację wieloklasową i zwraca zarówno przewidywaną klasę, jak i wektor wyników dla wszystkich klas.
+
+Zaletą sieci neuronowej jest możliwość wykrywania złożonych zależności między cechami geometrycznymi ziarna. Jej ograniczeniami są mniejsza interpretowalność parametrów, zależność wyniku od konfiguracji modelu i punktu początkowego optymalizacji oraz możliwość przeuczenia przy zbyt rozbudowanej architekturze. Z tego powodu zastosowano niewielką warstwę ukrytą oraz regularyzację wag.
+
 
 \section{Metoda hybrydowa}
 
-Metoda hybrydowa należy do grupy metod zespołowych (ensemble methods), których celem jest połączenie wyników wielu klasyfikatorów w celu poprawy jakości klasyfikacji. W przedstawionym rozwiązaniu wykorzystano trzy wcześniej zbudowane modele: wielomianową regresję logistyczną, las losowy (Random Forest) oraz sieć neuronową.
+Czwarty mechanizm decyzyjny stanowi model hybrydowy należący do metod zespołowych. Łączy on predykcje wielomianowej regresji logistycznej, lasu losowego oraz sieci neuronowej. Każdy z trzech modeli niezależnie przewiduje jedną z siedmiu klas, a wyniki są następnie agregowane za pomocą głosowania większościowego.
 
-Każdy z modeli generował niezależną predykcję klasy dla obserwacji ze zbioru testowego. Następnie zastosowano mechanizm głosowania większościowego (majority voting). Ostateczną klasę przypisywano na podstawie największej liczby głosów oddanych przez poszczególne modele.
+Dla obserwacji $x$ końcową decyzję można zapisać jako:
+\[
+\hat{Y}_{\mathrm{hyb}}(x)=\operatorname{mode}\left\{
+\hat{Y}_{\mathrm{log}}(x),
+\hat{Y}_{\mathrm{RF}}(x),
+\hat{Y}_{\mathrm{NN}}(x)
+\right\}.
+\]
+Jeżeli co najmniej dwa modele wskazują tę samą odmianę, zostaje ona przyjęta jako wynik końcowy. W przypadku trzech różnych predykcji zastosowana w kodzie funkcja wybiera pierwszą klasę po uporządkowaniu tabeli liczebności głosów, co zapewnia deterministyczne rozstrzygnięcie remisu.
 
-Przykładowo, jeśli dwa spośród trzech klasyfikatorów wskazywały tę samą klasę, była ona przyjmowana jako wynik końcowy. Takie podejście pozwala ograniczyć wpływ błędów pojedynczego modelu oraz zwiększyć stabilność procesu klasyfikacji.
+Takie podejście pozwala połączyć odmienne właściwości klasyfikatorów. Regresja logistyczna dostarcza prostego modelu probabilistycznego, las losowy dobrze odwzorowuje nieliniowości i interakcje, a sieć neuronowa może rozpoznawać bardziej złożone wzorce. Jeżeli błędy modeli nie występują dla tych samych obserwacji, głosowanie może ograniczyć wpływ błędnej decyzji pojedynczego klasyfikatora.
 
-Zastosowanie metody hybrydowej umożliwia wykorzystanie zalet różnych algorytmów. Regresja logistyczna dobrze modeluje zależności liniowe, Random Forest skutecznie identyfikuje zależności nieliniowe i interakcje pomiędzy cechami, natomiast sieci neuronowe pozwalają wykrywać bardziej złożone wzorce występujące w danych. Dzięki temu model zespołowy może osiągać lepsze wyniki niż pojedyncze klasyfikatory.
-
-
+W przedstawionym rozwiązaniu wszystkie trzy modele mają jednakową wagę, a głosowanie odbywa się na podstawie przewidywanych klas, nie zaś średniej przewidywanych prawdopodobieństw. Model hybrydowy nie jest więc osobno uczony; wykorzystuje wcześniej dopasowane klasyfikatory i stanowi dodatkową regułę decyzyjną. Jego jakość oceniono na tym samym zbiorze testowym i za pomocą tych samych mierników co jakość modeli składowych.
 
 \section{Przegląd literatury dotyczącej metod}
 
-Problematyka zautomatyzowanej oceny i klasyfikacji produktów rolniczych z wykorzystaniem wizji komputerowej jest intensywnie rozwijana w literaturze naukowej. Sam oryginalny zbiór danych \textit{Dry Bean Dataset} został opracowany i opublikowany w pracy Koklu i Ozkana \cite{koklu2020}. Autorzy skutecznie pozyskali parametry morfologiczne z obrazów ziaren, a następnie wykorzystali je do porównania wydajności klasyfikatorów takich jak sztuczne sieci neuronowe (MLP), maszyny wektorów nośnych oraz k-najbliższych sąsiadów. Ich badania dowiodły, że parametry geometryczne są wystarczające do zbudowania wysoce skutecznych modeli różnicujących gatunki fasoli.
+Problematyka automatycznej klasyfikacji produktów rolniczych z wykorzystaniem cech pozyskiwanych z obrazów jest szeroko omawiana w literaturze. Zbiór \textit{Dry Bean Dataset} został opracowany przez Köklü i Özkana \cite{koklu2020}. Autorzy wyodrębnili z obrazów ziaren cechy geometryczne i morfologiczne, a następnie porównali skuteczność kilku klasyfikatorów. Uzyskane rezultaty potwierdziły, że informacje o rozmiarze i kształcie ziarna mogą być skutecznie wykorzystywane do rozpoznawania odmian fasoli.
 
-Podstawy pod wykorzystane w analizie nowoczesne algorytmy uczenia maszynowego były formowane w pracach kładących podwaliny pod współczesne statystyczne analizy wielowymiarowe. Metoda maszyn wektorów nośnych (SVM) z mechanizmem obsługi danych zaszumionych (tworząca fundamenty sformułowanego w równaniach (3.3)--(3.4) miękkiego marginesu) została sformalizowana w przełomowej pracy Cortesa i Vapnika z 1995 roku \cite{cortes1995}. Rozwiązało to problem klasyfikacji zbiorów liniowo nieseparowalnych, co znacząco rozszerzyło dziedziny aplikacji tego modelu. Z kolei idea i ścisły dowód na to, że wstrzykiwanie losowości do zespołów klasyfikatorów znacząco redukuje błąd generalizacji, została opublikowana w kanonicznej już pracy Leo Breimana z 2001 roku \cite{breiman2001}, wprowadzającej algorytm \textit{Random Forest}. 
+Wielomianowa regresja logistyczna należy do klasycznych modeli probabilistycznych stosowanych w klasyfikacji wieloklasowej. Jej istotną zaletą jest możliwość interpretowania wpływu zmiennych poprzez ilorazy szans oraz uzyskiwania prawdopodobieństw przynależności do każdej klasy. Stanowi ona w badaniu punkt odniesienia dla bardziej elastycznych metod nieliniowych.
 
-Użyte jako punkt odniesienia klasyczne metody, takie jak wielomianowa regresja logistyczna oraz analiza dyskryminacyjna, opierają się na dobrze ugruntowanej teorii probabilistycznej i wciąż są powszechnie stosowane w obszarach wymagających bezpośredniej interpretacji estymowanych współczynników wpływu cech na przynależność klasową.
+Metoda \textit{Random Forest} została zaproponowana przez Breimana \cite{breiman2001}. Łączy ona agregację bootstrapową z losowym doborem zmiennych w węzłach drzew, co ogranicza korelację pomiędzy klasyfikatorami składowymi i pozwala zmniejszyć wariancję predykcji. Właściwość ta jest szczególnie użyteczna w zbiorach zawierających liczne, wzajemnie skorelowane cechy.
 
+Sieci neuronowe typu MLP są uniwersalnymi modelami aproksymacyjnymi zdolnymi do odwzorowywania złożonych zależności nieliniowych. W problemach klasyfikacji wieloklasowej często wykorzystuje się warstwę wyjściową z funkcją softmax, dzięki której wyniki można interpretować jako rozkład prawdopodobieństwa po klasach. Jednocześnie modele te wymagają doboru architektury, regularyzacji i parametrów procesu uczenia.
 
+Połączenie klasyfikatorów za pomocą głosowania jest jednym z podstawowych sposobów budowania modeli zespołowych. Celem jest wykorzystanie różnorodności metod składowych: jeżeli popełniają one odmienne błędy, decyzja większościowa może być stabilniejsza od wyniku pojedynczego modelu. W niniejszym projekcie zastosowano głosowanie trzech modeli reprezentujących różne podejścia do wyznaczania granic decyzyjnych.
 
 
 % ----------------------------------------------------
