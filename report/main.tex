@@ -109,7 +109,13 @@ Adam Włodarski (230983)
 \chapter*{Streszczenie}
 \addcontentsline{toc}{chapter}{Streszczenie}
 
-Repo:
+Celem projektu było porównanie metod klasyfikacji wieloklasowej w zadaniu rozpoznawania siedmiu odmian fasoli na podstawie cech geometrycznych i morfologicznych ziaren. Analizę przeprowadzono na zbiorze \textit{Dry Bean Dataset}. Z dostępnych zmiennych wybrano 12 cech opisujących rozmiar, kształt i proporcje ziaren. Przygotowanie danych obejmowało analizę rozkładów i korelacji, transformację logarytmiczną zmiennych o silnej asymetrii, identyfikację obserwacji odstających za pomocą reguły IQR i odległości Mahalanobisa oraz standaryzację predyktorów.
+
+W badaniu zastosowano wielomianową regresję logistyczną, las losowy, sieć neuronową typu MLP oraz metodę hybrydową opartą na głosowaniu większościowym trzech klasyfikatorów. Jako sposób walidacji wykorzystano stratyfikowany podział typu \textit{hold-out}, w którym 70\% obserwacji przeznaczono do uczenia, a 30\% do testowania. Jakość modeli oceniono na podstawie macierzy pomyłek, globalnej dokładności klasyfikacji oraz wartości \textit{Precision}, \textit{Recall} i \textit{F1-score} wyznaczonych osobno dla każdej klasy.
+
+Wszystkie modele osiągnęły wysoką skuteczność klasyfikacji. Najwyższą wartość \textit{Accuracy}, równą 95{,}46\%, uzyskała metoda hybrydowa. Wielomianowa regresja logistyczna osiągnęła 95{,}41\%, sieć neuronowa 95{,}25\%, a las losowy 94{,}21\%. Dodatkowo przedstawiono przykład użycia wytrenowanych modeli do klasyfikacji sztucznie wygenerowanych obserwacji. Wyniki wskazują, że cechy geometryczne ziaren umożliwiają skuteczne rozróżnianie analizowanych odmian, a połączenie predykcji kilku modeli może ograniczać wpływ pojedynczych błędów klasyfikacji.
+
+\noindent Repo:
 
 \url{https://github.com/joannadagil/DataAnalysisMethods-Classification.git}
 
@@ -120,13 +126,24 @@ Repo:
 
 
 \vspace{0.5cm}
-\noindent\textbf{Słowa kluczowe:} klasyfikacja wieloklasowa
+\noindent\textbf{Słowa kluczowe:} klasyfikacja wieloklasowa, wielomianowa regresja logistyczna, \textit{Random Forest}, sieć neuronowa, metoda hybrydowa
 
 
 % ----------------------------------------------------
 
 \chapter{Wstęp}
 
+Klasyfikacja jest jednym z podstawowych zadań analizy danych i uczenia maszynowego. Polega na przypisywaniu obserwacji do jednej z wcześniej określonych kategorii na podstawie zestawu opisujących je cech. W przypadku klasyfikacji wieloklasowej liczba możliwych kategorii jest większa niż dwie, co wymaga jednoczesnego rozróżniania wielu klas oraz uwzględnienia różnych rodzajów pomyłek popełnianych przez model.
+
+Metody klasyfikacyjne znajdują zastosowanie między innymi w medycynie, przemyśle, finansach oraz rolnictwie. W ostatnim z wymienionych obszarów mogą wspomagać automatyczną ocenę i sortowanie produktów na podstawie informacji pozyskiwanych ze zdjęć. Zastąpienie ręcznej oceny obiektów analizą komputerową pozwala zwiększyć powtarzalność procesu, ograniczyć jego czasochłonność oraz zmniejszyć wpływ subiektywnej oceny człowieka. Przykładem takiego zagadnienia jest rozpoznawanie odmian fasoli na podstawie wymiarów oraz parametrów opisujących kształt ziaren.
+
+W projekcie wykorzystano zbiór \textit{Dry Bean Dataset}, utworzony na podstawie obrazów ziaren siedmiu odmian fasoli: \textit{BARBUNYA}, \textit{BOMBAY}, \textit{CALI}, \textit{DERMASON}, \textit{HOROZ}, \textit{SEKER} oraz \textit{SIRA} \cite{koklu2020}. Każda obserwacja jest opisana zmiennymi geometrycznymi i morfologicznymi, takimi jak pole powierzchni, obwód, długości osi, zwartość, okrągłość czy mimośród. Zadanie polega na wyznaczeniu reguły, która na podstawie tych cech przypisuje pojedyncze ziarno do odpowiedniej odmiany.
+
+Głównym celem analizy jest porównanie modeli różniących się założeniami i sposobem wyznaczania granic decyzyjnych. Zastosowano wielomianową regresję logistyczną jako klasyczny model probabilistyczny, las losowy reprezentujący metody zespołowe oraz wielowarstwową sieć neuronową umożliwiającą modelowanie zależności nieliniowych. Predykcje tych trzech klasyfikatorów połączono następnie w metodzie hybrydowej wykorzystującej głosowanie większościowe.
+
+Istotnym elementem projektu było również odpowiednie przygotowanie danych. Obejmowało ono wybór 12 cech, analizę ich rozkładów i zależności, transformację zmiennych o silnej asymetrii, usunięcie obserwacji odstających oraz standaryzację. Modele oceniono na wspólnym zbiorze testowym z wykorzystaniem mierników dostosowanych do klasyfikacji wieloklasowej. Oprócz globalnej dokładności przeanalizowano macierze pomyłek oraz wartości \textit{Precision}, \textit{Recall} i \textit{F1-score} dla poszczególnych odmian.
+
+W dalszej części raportu przedstawiono charakterystykę zbioru i sposób przygotowania danych, podstawy teoretyczne zastosowanych metod, procedurę walidacji oraz porównanie uzyskanych wyników. Ostatnia część zawiera przykład wykorzystania wytrenowanych modeli do klasyfikacji sztucznie utworzonych obserwacji.
 
 % ----------------------------------------------------
 
