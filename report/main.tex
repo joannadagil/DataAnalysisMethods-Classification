@@ -890,20 +890,40 @@ Uzyskane wyniki pozwalają ocenić skuteczność podejścia zespołowego oraz po
 
 \chapter{Przykład użycia modeli na stworzonych sztucznie obserwacjach}
 
-Oprócz oceny modeli na zbiorze testowym przygotowano również krótki przykład użycia klasyfikatorów na obserwacjach sztucznie wygenerowanych. Celem tej części nie jest ponowna walidacja jakości modeli, ponieważ sztuczne obserwacje nie pochodzą z rzeczywistego pomiaru. Przykład pokazuje natomiast, w jaki sposób wytrenowane modele można wykorzystać do klasyfikacji nowych rekordów o znanych wartościach cech geometrycznych.
+Oprócz oceny modeli na wydzielonym zbiorze testowym przeprowadzono również przykład klasyfikacji sztucznie wygenerowanych obserwacji. Celem tej części nie jest dodatkowa walidacja jakości modeli, ponieważ wygenerowane rekordy nie stanowią niezależnych danych pochodzących z rzeczywistych pomiarów. Przykład ma jedynie pokazać sposób wykorzystania wytrenowanych klasyfikatorów do przewidywania klasy nowych obserwacji.
 
-Sztuczne obserwacje zostały wygenerowane osobno dla każdej odmiany fasoli. Dla każdej klasy wyznaczono średnie oraz odchylenia standardowe cech numerycznych w zbiorze uczącym, a następnie wylosowano przykładowe punkty położone blisko typowych wartości danej klasy. Aby uniknąć tworzenia nierealistycznych rekordów, wartości zostały ograniczone do zakresów obserwowanych w zbiorze uczącym.
+Sztuczne obserwacje wygenerowano na podstawie zbioru uczącego po przeprowadzeniu standaryzacji. Oznacza to, że nowe rekordy tworzono bezpośrednio w tej samej przestrzeni cech, w której uczone były modele. Nie było więc konieczne ponowne skalowanie wygenerowanych danych.
 
-Następnie sztuczne dane poddano takiemu samemu przeskalowaniu jak zbiór testowy. Wykorzystano do tego średnie i odchylenia standardowe obliczone wyłącznie na zbiorze uczącym, dzięki czemu zachowano spójność z procedurą preprocessingu zastosowaną przy trenowaniu modeli.
+Dla każdej z siedmiu odmian fasoli utworzono po dwie sztuczne obserwacje. Najpierw dla każdej klasy i każdej zmiennej objaśniającej wyznaczono średnią oraz odchylenie standardowe na podstawie obserwacji należących do danej klasy w zbiorze uczącym. Następnie wartości sztucznych cech losowano z rozkładu normalnego:
 
-Dla każdej sztucznej obserwacji wykonano predykcję za pomocą czterech podejść: wielomianowej regresji logistycznej, lasu losowego, sieci neuronowej oraz metody hybrydowej. W przypadku metody hybrydowej ostateczna klasa została wyznaczona przez głosowanie większościowe trzech pojedynczych klasyfikatorów.
+Następnie wartości sztucznych cech losowano z rozkładu normalnego:
+
+\[
+X_j^{*} \sim N\left(\overline{x}_{jk},
+\left(0{,}25s_{jk}\right)^2\right),
+\]
+
+gdzie $\overline{x}_{jk}$ oznacza średnią cechy $j$ dla klasy $k$, natomiast $s_{jk}$ oznacza jej odchylenie standardowe. Zastosowanie jednej czwartej odchylenia standardowego powoduje, że generowane punkty znajdują się stosunkowo blisko typowych obserwacji danej klasy.
+
+Aby ograniczyć możliwość powstawania skrajnych wartości, każdy wylosowany wynik został dodatkowo ograniczony do minimalnej i maksymalnej wartości danej cechy obserwowanej w zbiorze uczącym. W celu zapewnienia powtarzalności wyników przed generowaniem danych ustawiono ziarno generatora liczb pseudolosowych za pomocą polecenia \texttt{set.seed(123)}.
+
+Przyjęte podejście generuje każdą cechę osobno i nie odtwarza pełnej struktury korelacji pomiędzy zmiennymi. Z tego względu sztuczne rekordy należy traktować jako przykładowe punkty znajdujące się w pobliżu środka danej klasy, a nie jako dokładną symulację rzeczywistych ziaren fasoli.
+
+Dla każdej sztucznej obserwacji wykonano predykcję za pomocą wielomianowej regresji logistycznej, lasu losowego oraz sieci neuronowej. Następnie na podstawie wyników tych trzech modeli wyznaczono predykcję metody hybrydowej, wykorzystując głosowanie większościowe.
 
 \input{wyniki_sztuczne_dane.tex}
 
-W tabeli kolumna \textit{Klasa bazowa} oznacza klasę, na podstawie której wygenerowano daną sztuczną obserwację. Nie jest to rzeczywista etykieta pomiarowa, lecz punkt odniesienia pozwalający sprawdzić, czy modele przypisują wygenerowane obserwacje do klas zgodnych z ich konstrukcją. Zgodność predykcji z klasą bazową sugeruje, że model poprawnie rozpoznaje typowe układy cech charakterystyczne dla danej odmiany fasoli.
+Kolumna \textit{Klasa bazowa} wskazuje odmianę fasoli, na podstawie której obliczono parametry użyte do wygenerowania danej obserwacji. Nie jest ona rzeczywistą etykietą pochodzącą z pomiaru, lecz oczekiwanym punktem odniesienia. Zgodność przewidywanej klasy z klasą bazową oznacza, że model rozpoznał wygenerowany układ cech jako typowy dla danej odmiany.
 
+W większości przypadków wszystkie klasyfikatory wskazały klasę zgodną z klasą bazową. Pełną zgodność wszystkich modeli uzyskano między innymi dla obu obserwacji klasy \textit{BOMBAY} oraz obu obserwacji klasy \textit{HOROZ}. Świadczy to o tym, że sztuczne punkty wygenerowane dla tych klas znajdowały się w obszarach jednoznacznie rozpoznawanych przez zastosowane modele.
 
+Pojedyncze różnice wystąpiły przede wszystkim w przypadku wielomianowej regresji logistycznej oraz sieci neuronowej. Dla drugiej obserwacji bazowej \textit{BARBUNYA} regresja logistyczna wskazała klasę \textit{SEKER}, podczas gdy pozostałe modele wybrały \textit{BARBUNYA}. Podobna sytuacja wystąpiła dla jednej obserwacji klasy \textit{DERMASON}, którą regresja logistyczna przypisała do klasy \textit{SEKER}. Dla jednej obserwacji bazowej \textit{CALI} sieć neuronowa wskazała klasę \textit{SIRA}, natomiast dla jednej obserwacji bazowej \textit{SEKER} przypisała klasę \textit{DERMASON}.
 
+Największe różnice w predykcjach regresji logistycznej wystąpiły dla obserwacji bazowych klasy \textit{SIRA}. Zostały one przypisane odpowiednio do klas \textit{CALI} oraz \textit{HOROZ}, podczas gdy las losowy i sieć neuronowa poprawnie wskazały klasę \textit{SIRA}. Może to wynikać z bardziej liniowego charakteru granic decyzyjnych regresji logistycznej oraz podobieństwa części cech morfologicznych pomiędzy tymi odmianami.
+
+Metoda hybrydowa przypisała wszystkie sztuczne obserwacje do ich klas bazowych. Wynikało to z faktu, że w każdym przypadku co najmniej dwa spośród trzech modeli składowych wskazywały klasę zgodną z klasą bazową. W tym przykładzie głosowanie większościowe pozwoliło więc skorygować pojedyncze błędne predykcje poszczególnych klasyfikatorów.
+
+Uzyskanych wyników nie należy jednak interpretować jako dodatkowej miary skuteczności modeli. Sztuczne obserwacje powstały na podstawie statystyk tego samego zbioru uczącego, na którym modele były trenowane, dlatego ich klasyfikacja jest łatwiejsza niż klasyfikacja całkowicie niezależnych danych. Wiarygodna ocena zdolności generalizacji modeli została przeprowadzona wcześniej na wydzielonym zbiorze testowym.
 
 
 
