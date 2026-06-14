@@ -600,9 +600,50 @@ Użyte jako punkt odniesienia klasyczne metody, takie jak wielomianowa regresja 
 
 % jak to ktoś już zrobi to trzeba potem sprawdzić czy wyniki wszystkich tych metod mają je wszystkie i czy dobrze je interpretują
 
+Do oceny jakości klasyfikacji wykorzystano macierz pomyłek, dokładność klasyfikacji (\textit{Accuracy}) oraz miary \textit{Precision}, \textit{Recall} i \textit{F1-score}. Ponieważ analizowane zadanie jest problemem klasyfikacji wieloklasowej, każda obserwacja może zostać przypisana do jednej z siedmiu odmian fasoli. Z tego względu macierz pomyłek ma wymiar $K \times K$, gdzie w rozpatrywanym przypadku $K=7$. Wiersze macierzy odpowiadają klasom rzeczywistym, natomiast kolumny klasom przewidzianym przez model. Elementy na głównej przekątnej oznaczają obserwacje sklasyfikowane poprawnie, a elementy poza przekątną przedstawiają pomyłki między poszczególnymi klasami.
+
+Dokładność klasyfikacji jest jedną globalną miarą jakości całego modelu. W problemie wieloklasowym oblicza się ją jako udział wszystkich poprawnie sklasyfikowanych obserwacji w całkowitej liczbie obserwacji ze zbioru testowego:
+
+\[
+Accuracy = \frac{\sum_{k=1}^{K} n_{kk}}{N}
+\]
+
+gdzie $n_{kk}$ oznacza liczbę obserwacji klasy $k$ poprawnie przypisanych do tej samej klasy, a $N$ oznacza liczbę wszystkich obserwacji. W liczniku sumowane są zatem elementy znajdujące się na głównej przekątnej macierzy pomyłek. W przedstawionych wynikach nie wyznacza się oddzielnego \textit{Accuracy} dla każdej klasy. Jedna wartość tej miary podsumowuje skuteczność klasyfikatora dla wszystkich siedmiu klas jednocześnie.
+
+Samo \textit{Accuracy} nie pokazuje jednak, dla których odmian model działa dobrze, a dla których popełnia najwięcej błędów. Dlatego dodatkowo obliczono \textit{Precision}, \textit{Recall} oraz \textit{F1-score} osobno dla każdej klasy. W przypadku klasyfikacji wieloklasowej miary te wyznaczono w schemacie jeden-przeciwko-reszcie (\textit{one-vs-rest}). Dla rozpatrywanej klasy $k$ jest ona traktowana jako klasa pozytywna, natomiast wszystkie pozostałe klasy łącznie jako klasa negatywna.
+
+Dla każdej klasy $k$ zdefiniowano:
+
+\[
+Precision_k=\frac{TP_k}{TP_k+FP_k},
+\]
+
+\[
+Recall_k=\frac{TP_k}{TP_k+FN_k},
+\]
+
+\[
+F1_k=2\cdot\frac{\mathrm{Precision}_k\cdot\mathrm{Recall}_k}
+{\mathrm{Precision}_k+\mathrm{Recall}_k}.
+\]
+
+Wielkość $TP_k$ oznacza liczbę obserwacji klasy $k$ poprawnie rozpoznanych przez model. $FP_k$ oznacza liczbę obserwacji należących do innych klas, które błędnie przypisano do klasy $k$, natomiast $FN_k$ oznacza liczbę obserwacji klasy $k$, które błędnie przypisano do jednej z pozostałych klas. \textit{Precision} określa, jaka część obserwacji przewidzianych jako dana odmiana rzeczywiście do niej należy. \textit{Recall} informuje, jaka część wszystkich rzeczywistych obserwacji danej odmiany została poprawnie rozpoznana. \textit{F1-score} jest średnią harmoniczną tych dwóch miar i uwzględnia jednocześnie oba rodzaje błędów.
+
+Wyniki każdego klasyfikatora przedstawiono zatem na dwóch poziomach. Globalne \textit{Accuracy} służy do ogólnego porównania modeli, natomiast wartości \textit{Precision}, \textit{Recall} i \textit{F1-score} pozwalają ocenić jakość klasyfikacji osobno dla każdej z siedmiu odmian fasoli.
+
+
 \section{Sposób walidacji}
 
 % (np. krzyżowa, leave-one-out, wielokrotne próbkowanie) – minimum jeden sposó
+
+Do oceny zdolności modeli do klasyfikowania nowych obserwacji zastosowano walidację typu \textit{hold-out}. Polega ona na jednorazowym podziale zbioru danych na rozłączne zbiory: uczący oraz testowy. W przeprowadzonej analizie $70\%$ obserwacji przeznaczono do uczenia modeli, a pozostałe $30\%$ do ich końcowej oceny.
+
+Podział wykonano w sposób stratyfikowany, czyli oddzielnie w obrębie każdej klasy. Dzięki temu w zbiorze uczącym i testowym zachowano proporcje siedmiu odmian fasoli zbliżone do proporcji występujących w całym oczyszczonym zbiorze danych. Jest to szczególnie istotne w analizowanym problemie, ponieważ liczebności poszczególnych klas nie są jednakowe. Dla zapewnienia powtarzalności losowania ustawiono ziarno generatora liczb pseudolosowych na wartość 42.
+
+Zbiór uczący wykorzystano do estymacji parametrów wielomianowej regresji logistycznej, lasu losowego oraz sieci neuronowej. Zbiór testowy nie uczestniczył w procesie uczenia i służył wyłącznie do obliczenia końcowych wartości mierników jakości. Metodę hybrydową oceniono na tym samym zbiorze testowym, łącząc predykcje trzech wcześniej wytrenowanych klasyfikatorów.
+
+Aby uniknąć przenikania informacji ze zbioru testowego do procesu uczenia, parametry standaryzacji, czyli średnie i odchylenia standardowe zmiennych, wyznaczono wyłącznie na podstawie zbioru uczącego. Następnie te same parametry zastosowano do przeskalowania zbioru testowego. Wszystkie modele oceniono na identycznych obserwacjach testowych i przy użyciu tego samego zestawu mierników: macierzy pomyłek, \textit{Accuracy}, \textit{Precision}, \textit{Recall} oraz \textit{F1-score}. Pozwala to na bezpośrednie i porównywalne zestawienie wyników poszczególnych metod.
+
 
 \section{Wielomianowa regresja logistyczna}
 
