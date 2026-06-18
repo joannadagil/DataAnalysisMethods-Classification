@@ -1000,3 +1000,45 @@ cat(
   latex_synthetic_output_file,
   "\n"
 )
+
+# ----------------------------------------------------------
+## PORÓWNANIE DOKŁADNOŚCI (ACCURACY) DLA WSZYSTKICH METOD
+# ----------------------------------------------------------
+
+# Tworzenie zbiorczej ramki danych z wynikami
+comparison_accuracy <- data.frame(
+  Metoda = c(
+    "Wielomianowa regresja logistyczna",
+    "Random Forest (Las Losowy)",
+    "Sieć neuronowa",
+    "Metoda hybrydowa (Voting Ensemble)"
+  ),
+  Accuracy = round(c(
+    accuracy_multinom,
+    accuracy_rf,
+    accuracy_nn,
+    accuracy_hybrid
+  ), 4)
+)
+
+print("Porównanie dokładności modeli:")
+print(comparison_accuracy)
+
+# Generowanie kodu tabeli LaTeX przy użyciu pakietu knitr
+latex_comparison_table <- knitr::kable(
+  comparison_accuracy,
+  format = "latex",
+  booktabs = TRUE,
+  position = "H",
+  caption = "Zbiorcze porównanie dokładności (Accuracy) dla analizowanych metod klasyfikacji",
+  label = "comparison-accuracy",
+  row.names = FALSE
+)
+
+# Ścieżka do nowego pliku raportu
+latex_comparison_file <- file.path(report_dir, "porownanie_dokladnosci.tex")
+
+# Zapis do pliku
+writeLines(as.character(latex_comparison_table), latex_comparison_file)
+
+cat("\nZapisano zbiorcze porównanie dokładności w pliku:", latex_comparison_file, "\n")
