@@ -241,45 +241,66 @@ bean_clean <- bean_processed[-all_outliers, ]
 cat("\nLiczba obserwacji po czyszczeniu:", nrow(bean_clean), "\n")
 
 # --------------------------------------------------------------
-# PODZIAŁ I SKALOWANIE CECH
+# SKALOWANIE CAŁEGO ZBIORU I PODZIAŁ (Najpierw skalowanie potem podział)
 # --------------------------------------------------------------
 
 library(nnet)
+library(ggplot2)
 
 class_column <- "Class"
-# ZMIANA 1: Pracujemy na WYCZYSZCZONYCH danych (bean_clean)
 bean_clean[[class_column]] <- as.factor(bean_clean[[class_column]])
 
 # Sprawdzenie rozkładu klas po czyszczeniu
 cat("\nRozkład klas po czyszczeniu:\n")
 print(table(bean_clean[[class_column]]))
 
-# ----------------------------------------------------------
-## PODZIAŁ NA ZBIÓR UCZĄCY I TESTOWY (ze stratąfikacją)
-# ----------------------------------------------------------
+# --- KROK 1: SKALOWANIE CAŁEGO ZBIORU PRZED PODZIAŁEM ---
+
+predictor_columns <- setdiff(names(bean_clean), class_column)
+numeric_predictors <- predictor_columns[sapply(bean_clean[predictor_columns], is.numeric)]
+
+# Tworzymy kopię do skalowania
+bean_scaled_all <- bean_clean
+
+# Obliczamy średnie i odchylenia z CAŁEGO zbioru i skalujemy go globalnie
+global_means <- sapply(bean_clean[numeric_predictors], mean, na.rm = TRUE)
+global_sds <- sapply(bean_clean[numeric_predictors], sd, na.rm = TRUE)
+
+bean_scaled_all[numeric_predictors] <- scale(
+  bean_clean[numeric_predictors],
+  center = global_means,
+  scale = global_sds
+)
+
+cat("\nDane zostały przeskalowane globalnie (dla całego zbioru).\n")
+
+
+# --- KROK 2: PODZIAŁ NA ZBIÓR UCZĄCY I TESTOWY (na już przeskalowanych danych) ---
+
 set.seed(42)
 
 train_indices <- unlist(
   tapply(
-    seq_len(nrow(bean_clean)),
-    bean_clean[[class_column]],
+    seq_len(nrow(bean_scaled_all)),
+    bean_scaled_all[[class_column]],
     function(indices) {
       sample(indices, size = floor(0.7 * length(indices)))
     }
   )
 )
 
-train_data <- bean_clean[train_indices, ]
-test_data  <- bean_clean[-train_indices, ]
+# Tworzymy ostateczne zbiory bezpośrednio z ramki bean_scaled_all
+train_scaled <- bean_scaled_all[train_indices, ]
+test_scaled  <- bean_scaled_all[-train_indices, ]
 
-cat("\nLiczba obserwacji w zbiorze uczącym:", nrow(train_data), "\n")
-cat("Liczba obserwacji w zbiorze testowym:", nrow(test_data), "\n\n")
+cat("\nLiczba obserwacji w zbiorze uczącym (train_scaled):", nrow(train_scaled), "\n")
+cat("Liczba obserwacji w zbiorze testowym (test_scaled):", nrow(test_scaled), "\n\n")
+
 
 # --- WYKRESY PROPORCJI KLAS ---
 if (!requireNamespace("ggplot2", quietly = TRUE)) {
   stop("Brakuje pakietu ggplot2.")
 }
-library(ggplot2)
 
 class_levels <- levels(bean_clean[[class_column]])
 
@@ -295,8 +316,8 @@ get_class_proportions <- function(data, set_name) {
 
 class_proportions <- rbind(
   get_class_proportions(bean_clean, "Cały zbiór (oczyszczony)"),
-  get_class_proportions(train_data, "Zbiór uczący"),
-  get_class_proportions(test_data, "Zbiór testowy")
+  get_class_proportions(train_scaled, "Zbiór uczący"),
+  get_class_proportions(test_scaled, "Zbiór testowy")
 )
 
 class_proportions$Procent <- paste0(round(100 * class_proportions$Proportion, 1), "%")
@@ -315,35 +336,6 @@ class_proportions_pdf <- file.path(report_dir, "proporcje_klas_original_train_te
 ggsave(filename = class_proportions_pdf, plot = plot_class_proportions, width = 10, height = 9)
 cat("Zapisano wykres proporcji klas w pliku:", class_proportions_pdf, "\n")
 
-# ----------------------------------------------------------
-## SKALOWANIE ZMIENNYCH NUMERYCZNYCH 
-## ZMIANA 2: Parametry liczone TYLKO ze zbioru uczącego!
-# ----------------------------------------------------------
-
-predictor_columns <- setdiff(names(bean_clean), class_column)
-numeric_predictors <- predictor_columns[sapply(bean_clean[predictor_columns], is.numeric)]
-
-train_scaled <- train_data
-test_scaled <- test_data
-
-# Złota zasada: wyciągamy średnią i odchylenie tylko ze zbioru treningowego
-train_means <- sapply(train_data[numeric_predictors], mean, na.rm = TRUE)
-train_sds <- sapply(train_data[numeric_predictors], sd, na.rm = TRUE)
-
-# Skalujemy oba zbiory używając parametrów treningowych
-train_scaled[numeric_predictors] <- scale(
-  train_data[numeric_predictors],
-  center = train_means,
-  scale = train_sds
-)
-
-test_scaled[numeric_predictors] <- scale(
-  test_data[numeric_predictors],
-  center = train_means,
-  scale = train_sds
-)
-
-cat("\nDane zostały poprawnie podzielone i przeskalowane (bez wycieku danych).\n")
 
 # --- STATYSTYKI OPISOWE DLA ZBIORU UCZĄCEGO (po skalowaniu) ---
 numeric_summary <- data.frame(
@@ -375,7 +367,6 @@ latex_output_file <- file.path(report_dir, "tabele_statystyki_opisowe_przeskalow
 writeLines(latex_output, latex_output_file)
 
 cat("Zapisano tabele LaTeX w pliku:", latex_output_file, "\n")
-
 
 # ----------------------------------------------------------
 ## 3.1 WIELOMIANOWA REGRESJA LOGISTYCZNA
